@@ -1,0 +1,21 @@
+Projeto: Quiz SaaS multi-cliente (Next.js 14 + Supabase + Framer Motion + Tailwind)
+
+Estrutura:
+- app/ → rotas (App Router)
+- components/quiz/ → componentes do quiz público
+- components/quiz/blocos/ → 11 tipos de bloco (intro, pergunta, conteudo, antes_depois, grafico, prova_social, loading, captura, resultado, oferta, html, relatorio_diagnostico)
+- components/editor/ → editor visual no admin
+- lib/ → supabase, quiz2, tracking, pixels, metricas
+- supabase/migrations/ → SQL
+
+Regras importantes:
+- Sempre usar `@/` pra imports absolutos
+- Componentes do quiz são 'use client'
+- Cada bloco recebe { config, tema, quiz, avancar } por padrão
+- Blocos de pergunta recebem { pergunta, respostas, onResponder }
+- Use `TextoRico` do components/quiz/ui/TextoRico.jsx para textos com marcações (==destaque==, __atenção__, **negrito**)
+- Use `Botao` do components/quiz/ui/Botao.jsx para botões (variants: primario, outline, ghost)
+- Nunca usar target="_blank" nos CTAs
+- Sempre testar preview (URL com ?preview=1) não deve gravar tracking
+
+Bug conhecido: variáveis `cfg` vs `config` em alguns lugares do BlocoOferta

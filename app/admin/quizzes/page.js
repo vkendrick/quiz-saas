@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { listarQuizzes, deletarQuiz } from '@/lib/quiz';
+import { listarQuizzes, deletarQuiz } from '@/lib/quiz2';
 
 export default function QuizzesPage() {
   const [lista, setLista] = useState([]);
@@ -31,12 +31,28 @@ export default function QuizzesPage() {
                 <td className="p-3 font-medium">{q.titulo}</td>
                 <td className="p-3 text-gray-500">{q.slug}</td>
                 <td className="p-3"><span className={q.ativo ? 'text-green-600' : 'text-red-500'}>{q.ativo ? 'Ativo' : 'Inativo'}</span></td>
-                <td className="p-3 text-right flex gap-3 justify-end">
-                  <a href={`/quiz/${q.slug}`} target="_blank" className="text-blue-600 text-xs">Ver</a>
-                  <Link href={`/admin/metricas/${q.id}`} className="text-purple-600 text-xs">Métricas</Link>
-                  <Link href={`/admin/quizzes/${q.id}`} className="text-gray-700 text-xs">Editar</Link>
-                  <button onClick={() => remover(q.id)} className="text-red-500 text-xs">Excluir</button>
-                </td>
+<td className="p-3 text-right flex gap-3 justify-end">
+  <a href={`/quiz/${q.slug}`} target="_blank" className="text-blue-600 text-xs">Ver</a>
+  <Link href={`/admin/metricas/${q.id}`} className="text-purple-600 text-xs">Métricas</Link>
+  <Link href={`/admin/quizzes/${q.id}`} className="text-gray-700 text-xs">Editar</Link>
+  <button
+    onClick={async () => {
+      if (!confirm(`Duplicar "${q.titulo}"?`)) return;
+      const { duplicarQuiz } = await import('@/lib/quiz2');
+      try {
+        const novo = await duplicarQuiz(q.id);
+        alert(`Cópia criada: ${novo.slug}`);
+        carregar();
+      } catch (e) {
+        alert('Erro: ' + e.message);
+      }
+    }}
+    className="text-green-600 text-xs"
+  >Duplicar</button>
+  <button onClick={() => remover(q.id)} className="text-red-500 text-xs">Excluir</button>
+</td>            
+
+
               </tr>
             ))}
             {lista.length === 0 && (<tr><td colSpan={4} className="p-6 text-center text-gray-400">Nenhum quiz criado</td></tr>)}

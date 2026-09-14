@@ -1,7 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  images: { unoptimized: true }
+  reactStrictMode: false,
+  images: { unoptimized: true },
+  transpilePackages: ['framer-motion'],
+  experimental: {
+    optimizePackageImports: ['framer-motion', 'recharts']
+  },
+  async headers() {
+    return [
+      {
+        source: '/quiz/:slug*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' }
+        ]
+      }
+    ];
+  }
 };
 
 try {

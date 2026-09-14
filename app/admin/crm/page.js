@@ -1,10 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { listarLeads, resumoCrm, atualizarLead, exportarCsv } from '@/lib/crm';
+import { listarLeads, atualizarLead, exportarCsv } from '@/lib/crm';
 import { listarQuizzes } from '@/lib/quiz';
 
-const STATUS = ['novo', 'contatado', 'qualificado', 'proposta', 'ganho', 'perdido'];
+const STATUS = [
+  'novo',
+  'iniciou',
+  'respondeu',
+  'concluiu',
+  'foi_checkout',
+  'comprou',
+  'perdido'
+];
 
 export default function CrmPage() {
   const [quizzes, setQuizzes] = useState([]);
@@ -19,13 +27,28 @@ export default function CrmPage() {
 
   const carregar = async () => {
     if (!quizId) return;
-    const [l, r] = await Promise.all([listarLeads(quizId, filtro), resumoCrm(quizId)]);
-    setLeads(l); setResumo(r);
+    const todos = await listarLeads(quizId, { busca: filtro.busca });
+    const resumoLocal = STATUS.map(status => ({
+      status,
+      total: todos.filter(l => (l.status_pipeline || 'novo') === status).length,
+      valor: todos
+        .filter(l => (l.status_pipeline || 'novo') === status)
+        .reduce((acc, l) => acc + (Number(l.valor_pago) || 0), 0)
+    }));
+    setResumo(resumoLocal);
+    setLeads(
+      filtro.status
+        ? todos.filter(l => (l.status_pipeline || 'novo') === filtro.status)
+        : todos
+    );
   };
 
   useEffect(() => { carregar(); /* eslint-disable-next-line */ }, [quizId, filtro.status, filtro.busca]);
 
-  const mudarStatus = async (leadId, status) => { await atualizarLead(leadId, { status }); carregar(); };
+  const mudarStatus = async (leadId, status) => {
+    await atualizarLead(leadId, { status_pipeline: status });
+    carregar();
+  };
 
   return (
     <div>
@@ -33,6 +56,11 @@ export default function CrmPage() {
         <h1 className="text-2xl font-bold">CRM — Pipeline de Leads</h1>
         <button onClick={() => exportarCsv(leads, `leads-${quizId}.csv`)}
           className="text-sm border rounded-lg px-3 py-2 bg-white">⬇ Exportar CSV</button>
+<Link href="/admin/crm/kanban"
+  className="text-sm border rounded-lg px-3 py-2 bg-white"
+  style={{ marginLeft: 8 }}>
+  📊 Ver Kanban
+</Link>
       </div>
 
       <div className="flex gap-3 mb-4">
@@ -77,7 +105,7 @@ export default function CrmPage() {
                 </td>
                 <td className="p-3">{l.score}</td>
                 <td className="p-3">
-                  <select value={l.status || 'novo'} onChange={e => mudarStatus(l.id, e.target.value)}
+                  <select value={l.status_pipeline || 'novo'} onChange={e => mudarStatus(l.id, e.target.value)}
                     className="border rounded px-2 py-1 text-xs capitalize">
                     {STATUS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
