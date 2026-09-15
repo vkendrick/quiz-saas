@@ -396,14 +396,7 @@ case 'grafico': {
     <TelaFundo tema={tema}>
       <LogoTopo tema={tema} quiz={quiz} />
       <Pixels integracoes={quiz.integracoes} />
-<BarraProgresso
-  progresso={progresso}
-  tema={tema}
-  mostrarContador={true}
-  atual={indiceAtual + 1}
-  total={blocos.length}
-  mostrarTexto={true}
-/>
+      <BarraProgresso progresso={progresso} tema={tema} />
       <main
         style={{
           flex: 1,
