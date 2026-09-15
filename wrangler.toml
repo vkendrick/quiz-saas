@@ -1,8 +1,11 @@
 name = "quiz-saas"
 compatibility_date = "2024-09-01"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".vercel/output/static"
 
-[vars]
-NEXT_PUBLIC_SUPABASE_URL = "https://fvobroatzddjijzyvuzt.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2b2Jyb2F0emRkamlqenl2dXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMTY1OTUsImV4cCI6MjEwNDU5MjU5NX0.BzMdE4ZCnYt9vxYSOeDAXwqLVUeBDP3J1whkh8exBBA"
+# Worker principal gerado pelo next-on-pages
+main = ".vercel/output/static/_worker.js/index.js"
+
+# Assets estáticos servidos pelo Worker
+[assets]
+directory = ".vercel/output/static"
+binding = "ASSETS"
