@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
-
+export const runtime = 'edge';
 export default function MenuQuiz() {
   const { id } = useParams();
   const [quiz, setQuiz] = useState(null);

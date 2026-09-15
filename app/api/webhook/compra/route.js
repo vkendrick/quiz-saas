@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-
+export const runtime = 'edge';
 // Webhook genérico — funciona com Hotmart, Kiwify, Perfect Pay, etc.
 // Cada plataforma envia formato diferente, então aceitamos vários campos.
 export async function POST(request) {

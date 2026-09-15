@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import Metricas from '@/components/Metricas';
 import Link from 'next/link';
 import FunilVisual from '@/components/admin/FunilVisual';
-
+export const runtime = 'edge';
 
 export default function MetricasPage() {
   const { id } = useParams();

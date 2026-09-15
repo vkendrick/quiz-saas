@@ -7,7 +7,7 @@ import { atualizarQuiz } from '@/lib/quiz2';
 import SeletorPaleta from '@/components/editor/SeletorPaleta';
 import SeletorFonte from '@/components/editor/SeletorFonte';
 import SeletorImagem from '@/components/editor/SeletorImagem';
-
+export const runtime = 'edge';
 export default function TemaPage() {
   const { id } = useParams();
   const router = useRouter();
