@@ -9,7 +9,7 @@
   "lint": "next lint",
   "pages:build": "npx @cloudflare/next-on-pages",
   "pages:deploy": "wrangler pages deploy .vercel/output/static",
-  "deploy": "npx wrangler deploy --config ./wrangler.toml"
+  "deploy": "npx @cloudflare/next-on-pages && echo _worker.js > .vercel/output/static/.assetsignore && wrangler deploy"
 },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
