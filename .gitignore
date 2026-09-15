@@ -2,7 +2,5 @@ node_modules
 .next
 .vercel
 .wrangler
-.env.local
-.env*.local
 *.zip
 .DS_Store
