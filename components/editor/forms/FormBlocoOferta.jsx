@@ -1,6 +1,6 @@
 'use client';
-import SeletorImagem from '../SeletorImagem';
 import { useState } from 'react';
+import SeletorImagem from '../SeletorImagem';
 
 const input = { width: '100%', padding: '8px 12px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13, outline: 'none' };
 const textarea = { ...input, fontFamily: 'inherit', resize: 'vertical' };
@@ -34,8 +34,18 @@ const Secao = ({ titulo, children, aberta: abertaInicial = false }) => {
   );
 };
 
-export default function FormBlocoOferta({ config, onChange }) {
+function Toggle({ label, valor, onChange }) {
+  return (
+    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer', marginTop: 6 }}>
+      <input type="checkbox" checked={valor} onChange={e => onChange(e.target.checked)} />
+      {label}
+    </label>
+  );
+}
+
+export default function FormBlocoOferta({ config = {}, onChange, quiz }) {
   const set = (patch) => onChange({ ...config, ...patch });
+
   const antesDepois = config.antes_depois || { antes: {}, depois: {} };
   const beneficios = config.beneficios || { antes: [], depois: [] };
   const receber = config.receber || [];
@@ -43,6 +53,16 @@ export default function FormBlocoOferta({ config, onChange }) {
   const mostrarSecoes = config.mostrar_secoes || {};
 
   const setMostrar = (chave, valor) => set({ mostrar_secoes: { ...mostrarSecoes, [chave]: valor } });
+
+  const setAntesDepois = (patch) => set({
+    antes_depois: { ...antesDepois, ...patch }
+  });
+  const setAntes = (patch) => setAntesDepois({
+    antes: { ...(antesDepois.antes || {}), ...patch }
+  });
+  const setDepois = (patch) => setAntesDepois({
+    depois: { ...(antesDepois.depois || {}), ...patch }
+  });
 
   const setBeneficio = (lado, i, valor) => {
     const lista = [...(beneficios[lado] || [])];
@@ -61,7 +81,7 @@ export default function FormBlocoOferta({ config, onChange }) {
     lista[i] = { ...lista[i], ...patch };
     set({ receber: lista });
   };
-  const addReceber = () => set({ receber: [...receber, { emoji: '✅', titulo: '', descricao: '' }] });
+  const addReceber = () => set({ receber: [...receber, { emoji: '✅', titulo: '', descricao: '', imagem_url: '' }] });
   const rmReceber = (i) => set({ receber: receber.filter((_, j) => j !== i) });
 
   return (
@@ -76,27 +96,33 @@ export default function FormBlocoOferta({ config, onChange }) {
       <Secao titulo="🖼️ Antes / Depois" aberta={!!antesDepois.antes?.imagem_url}>
         <div style={{ display: 'grid', gap: 8 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', marginBottom: 4 }}>Antes</div>
+            <div style={{ padding: 10, background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#991B1B', marginBottom: 6 }}>ANTES</div>
               <input
                 value={antesDepois.antes?.titulo || ''}
-                onChange={e => set({ antes_depois: { ...antesDepois, antes: { ...(antesDepois.antes || {}), titulo: e.target.value } } })}
-                placeholder="Você hoje" style={{ ...input, marginBottom: 6 }} />
+                onChange={e => setAntes({ titulo: e.target.value })}
+                placeholder="Você hoje"
+                style={{ ...input, marginBottom: 8 }}
+              />
               <SeletorImagem
                 valor={antesDepois.antes?.imagem_url}
-                onChange={v => set({ antes_depois: { ...antesDepois, antes: { ...(antesDepois.antes || {}), imagem_url: v } } })}
-                pasta="oferta/antes" />
+                onChange={v => setAntes({ imagem_url: v })}
+                pasta="oferta/antes"
+              />
             </div>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', marginBottom: 4 }}>Depois</div>
+            <div style={{ padding: 10, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#166534', marginBottom: 6 }}>DEPOIS</div>
               <input
                 value={antesDepois.depois?.titulo || ''}
-                onChange={e => set({ antes_depois: { ...antesDepois, depois: { ...(antesDepois.depois || {}), titulo: e.target.value } } })}
-                placeholder="Você depois" style={{ ...input, marginBottom: 6 }} />
+                onChange={e => setDepois({ titulo: e.target.value })}
+                placeholder="Você depois"
+                style={{ ...input, marginBottom: 8 }}
+              />
               <SeletorImagem
                 valor={antesDepois.depois?.imagem_url}
-                onChange={v => set({ antes_depois: { ...antesDepois, depois: { ...(antesDepois.depois || {}), imagem_url: v } } })}
-                pasta="oferta/depois" />
+                onChange={v => setDepois({ imagem_url: v })}
+                pasta="oferta/depois"
+              />
             </div>
           </div>
           <Toggle label="Mostrar essa seção" valor={mostrarSecoes.antes_depois !== false}
@@ -109,7 +135,7 @@ export default function FormBlocoOferta({ config, onChange }) {
         <div style={{ display: 'grid', gap: 10 }}>
           <Campo label="Título da seção">
             <input value={beneficios.titulo || ''} onChange={e => set({ beneficios: { ...beneficios, titulo: e.target.value } })}
-              style={input} placeholder="Veja os benefícios para você:" />
+              style={input} placeholder="Veja os benefícios:" />
           </Campo>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -227,7 +253,7 @@ export default function FormBlocoOferta({ config, onChange }) {
         </div>
       </Secao>
 
-      {/* O QUE RECEBER */}
+      {/* 🔽 O QUE RECEBER — COM IMAGEM POR ITEM */}
       <Secao titulo="🎁 O que vai receber" aberta={receber.length > 0}>
         <div style={{ display: 'grid', gap: 8 }}>
           <Campo label="Título da seção">
@@ -238,26 +264,71 @@ export default function FormBlocoOferta({ config, onChange }) {
             <input value={config.receber_subtitulo || ''} onChange={e => set({ receber_subtitulo: e.target.value })}
               style={input} placeholder="Plano completo..." />
           </Campo>
-          <Campo label="Imagem do produto (mockup)">
-            <SeletorImagem valor={config.imagem_produto} onChange={v => set({ imagem_produto: v })} pasta="oferta/produto" />
-          </Campo>
 
-          {receber.map((item, i) => (
-            <div key={i} style={{ padding: 10, background: '#FFF', border: '1px solid #E5E7EB', borderRadius: 8 }}>
-              <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
-                <input value={item.emoji || ''} onChange={e => setReceber(i, { emoji: e.target.value })}
-                  placeholder="✅" style={{ ...input, width: 50, textAlign: 'center' }} />
-                <input value={item.titulo || ''} onChange={e => setReceber(i, { titulo: e.target.value })}
-                  placeholder="Título" style={{ ...input, flex: 1 }} />
-                <button type="button" onClick={() => rmReceber(i)}
-                  style={{ background: '#FEE2E2', border: 'none', color: '#DC2626', padding: '0 10px', borderRadius: 6, cursor: 'pointer' }}>×</button>
-              </div>
-              <textarea value={item.descricao || ''} onChange={e => setReceber(i, { descricao: e.target.value })}
-                placeholder="Descrição" rows={2} style={textarea} />
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
+              Itens ({receber.length})
             </div>
-          ))}
-          <button type="button" onClick={addReceber}
-            style={{ fontSize: 12, color: '#3B82F6', background: 'none', border: '1px dashed #93C5FD', padding: '6px 12px', borderRadius: 6, cursor: 'pointer' }}>+ adicionar item</button>
+            {receber.map((item, i) => (
+              <div key={i} style={{
+                padding: 12,
+                background: '#FFF',
+                border: '1px solid #E5E7EB',
+                borderRadius: 8,
+                marginBottom: 8
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#6B7280' }}>Item #{i + 1}</span>
+                  <button type="button" onClick={() => rmReceber(i)}
+                    style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer', fontSize: 12 }}>
+                    Excluir
+                  </button>
+                </div>
+
+                {/* Imagem do item */}
+                <Campo label="Imagem do item">
+                  <SeletorImagem
+                    valor={item.imagem_url}
+                    onChange={v => setReceber(i, { imagem_url: v })}
+                    pasta={`receber/${i}`}
+                  />
+                </Campo>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '60px 1fr', gap: 8, marginTop: 8 }}>
+                  <Campo label="Emoji">
+                    <input value={item.emoji || ''} onChange={e => setReceber(i, { emoji: e.target.value })}
+                      placeholder="📘" style={{ ...input, textAlign: 'center' }} />
+                  </Campo>
+                  <Campo label="Título">
+                    <input value={item.titulo || ''} onChange={e => setReceber(i, { titulo: e.target.value })}
+                      placeholder="Guia Completo" style={input} />
+                  </Campo>
+                </div>
+
+                <div style={{ marginTop: 8 }}>
+                  <Campo label="Descrição">
+                    <textarea value={item.descricao || ''} onChange={e => setReceber(i, { descricao: e.target.value })}
+                      placeholder="Entenda tudo do zero..." rows={2} style={textarea} />
+                  </Campo>
+                </div>
+              </div>
+            ))}
+            <button type="button" onClick={addReceber}
+              style={{ fontSize: 12, color: '#3B82F6', background: 'none', border: '1px dashed #93C5FD', padding: '6px 12px', borderRadius: 6, cursor: 'pointer' }}>
+              + adicionar item
+            </button>
+          </div>
+
+          {/* Mockup do produto */}
+          <div style={{ marginTop: 12 }}>
+            <Campo label="Imagem do produto (mockup)">
+              <SeletorImagem
+                valor={config.imagem_produto}
+                onChange={v => set({ imagem_produto: v })}
+                pasta="oferta/produto"
+              />
+            </Campo>
+          </div>
 
           <Toggle label="Mostrar essa seção" valor={mostrarSecoes.receber !== false}
             onChange={v => setMostrar('receber', v)} />
@@ -299,9 +370,6 @@ export default function FormBlocoOferta({ config, onChange }) {
               style={{ width: '100%', height: 34, border: '1px solid #E5E7EB', borderRadius: 8 }} />
           </Campo>
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6 }}>
-          Se não configurar, usa a cor de destaque do tema.
-        </div>
       </Secao>
 
       {/* HTML LIVRE */}
@@ -314,14 +382,5 @@ export default function FormBlocoOferta({ config, onChange }) {
       </Secao>
 
     </div>
-  );
-}
-
-function Toggle({ label, valor, onChange }) {
-  return (
-    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer', marginTop: 6 }}>
-      <input type="checkbox" checked={valor} onChange={e => onChange(e.target.checked)} />
-      {label}
-    </label>
   );
 }
