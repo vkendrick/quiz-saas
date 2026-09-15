@@ -6,7 +6,6 @@ import { supabase } from '@/lib/supabase-browser';
 import EditorBlocos from '@/components/editor/EditorBlocos';
 import PreviewTempoReal from '@/components/editor/PreviewTempoReal';
 import GuiaTexto from '@/components/editor/GuiaTexto';
-export const runtime = 'edge';
 export default function EditorQuizPage() {
   const { id } = useParams();
   const [quiz, setQuiz] = useState(null);

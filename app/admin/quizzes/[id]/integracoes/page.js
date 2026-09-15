@@ -4,7 +4,6 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
 import { atualizarQuiz } from '@/lib/quiz2';
-export const runtime = 'edge';
 const PIXELS = [
   { key: 'meta_pixel', label: 'Meta Pixel ID' },
   { key: 'ga4', label: 'GA4 — Measurement ID (G-XXXX)' },

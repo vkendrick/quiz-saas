@@ -4,7 +4,6 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
 import { uploadMedia } from '@/lib/quiz2';
-export const runtime = 'edge';
 export default function PerguntasPage() {
   const { id } = useParams();
   const [perguntas, setPerguntas] = useState([]);

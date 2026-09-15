@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { getLead, atualizarLead, adicionarNota, adicionarHistorico } from '@/lib/crm';
-export const runtime = 'edge';
 const STATUS = ['novo', 'contatado', 'qualificado', 'proposta', 'ganho', 'perdido'];
 
 export default function LeadDetalhe() {
