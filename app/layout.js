@@ -21,6 +21,11 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="pt-BR" className={fontes}>
+{/* 🔽 Preconnect e preload de recursos críticos */}
+<link rel="preconnect" href="https://fvobroatzddjijzyvuzt.supabase.co" />
+<link rel="dns-prefetch" href="https://fvobroatzddjijzyvuzt.supabase.co" />
+<link rel="preconnect" href="https://images.unsplash.com" />
+<link rel="dns-prefetch" href="https://images.unsplash.com" />
       <head>
         {supabaseUrl && (
           <>
