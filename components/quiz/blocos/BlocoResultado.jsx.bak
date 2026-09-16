@@ -3,58 +3,17 @@ import { motion } from 'framer-motion';
 import Botao from '../ui/Botao';
 import TextoRico from '../ui/TextoRico';
 
-export default function BlocoResultado({
-  config = {},
-  tema = {},
-  score = 0,
-  avancar,
-  categoriaVencedora = null
-}) {
-  // 🔽 V2 — Detecta se é modo por categoria ou por score
-  const isCategoria = config.tipo === 'por_categoria';
-
-  let resultado = null;
-
-  if (isCategoria && config.categorias) {
-    // Modo por CATEGORIA (V2)
-    const cat = categoriaVencedora ? config.categorias[categoriaVencedora] : null;
-    const fallback = config.categorias[Object.keys(config.categorias)[0]];
-
-    const escolhido = cat || fallback;
-    if (escolhido) {
-      resultado = {
-        titulo: escolhido.titulo,
-        texto: escolhido.texto,
-        imagem_url: escolhido.imagem_url,
-        cta_url: escolhido.cta_url,
-        cta_texto: escolhido.cta_texto,
-        badge: escolhido.badge || 'Diagnóstico completo'
-      };
-    }
-  } else {
-    // Modo por SCORE (padrão antigo)
-    const faixas = config.faixas || [];
-    const faixa = faixas.find(f => score >= (f.min ?? 0) && score <= (f.max ?? 9999))
-      || faixas[faixas.length - 1];
-
-    if (faixa) {
-      resultado = {
-        titulo: faixa.titulo,
-        texto: faixa.texto,
-        imagem_url: faixa.imagem_url,
-        cta_url: faixa.cta_url,
-        cta_texto: faixa.cta_texto,
-        badge: faixa.badge || 'Diagnóstico completo'
-      };
-    }
-  }
+export default function BlocoResultado({ config = {}, tema = {}, score = 0, avancar }) {
+  const faixas = config.faixas || [];
+  const faixa = faixas.find(f => score >= (f.min ?? 0) && score <= (f.max ?? 9999))
+    || faixas[faixas.length - 1];
 
   const cor = tema.ctaCor || tema.destaque || '#0EA5E9';
   const mostrarGraficoFinal = config.grafico_final === true;
 
   return (
     <div>
-      {resultado ? (
+      {faixa ? (
         <>
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
             <div style={{
@@ -67,11 +26,11 @@ export default function BlocoResultado({
               borderRadius: 999,
               marginBottom: 16
             }}>
-              {resultado.badge}
+              Diagnóstico completo
             </div>
 
             <TextoRico
-              texto={resultado.titulo}
+              texto={faixa.titulo}
               tema={tema}
               as="h2"
               style={{
@@ -84,9 +43,9 @@ export default function BlocoResultado({
             />
           </div>
 
-          {resultado.texto && (
+          {faixa.texto && (
             <TextoRico
-              texto={resultado.texto}
+              texto={faixa.texto}
               tema={tema}
               style={{
                 fontSize: 16,
@@ -98,22 +57,19 @@ export default function BlocoResultado({
             />
           )}
 
-          {resultado.imagem_url && (
+          {faixa.imagem_url && (
             <img
-              src={resultado.imagem_url}
+              src={faixa.imagem_url}
               alt=""
-              width={600}
-              height={400}
               loading="lazy"
-              decoding="async"
               style={{
-                width: '100%', height: 'auto', borderRadius: 16,
+                width: '100%', borderRadius: 16,
                 marginBottom: 24, display: 'block'
               }}
             />
           )}
 
-          {/* Gráfico evolutivo dentro do resultado */}
+          {/* 🔽 GRÁFICO EVOLUTIVO DENTRO DO RESULTADO */}
           {mostrarGraficoFinal && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -166,6 +122,7 @@ export default function BlocoResultado({
                 />
               </svg>
 
+              {/* Marcadores */}
               <div style={{
                 position: 'absolute',
                 left: '25%', top: '75%',
@@ -206,31 +163,10 @@ export default function BlocoResultado({
             </motion.div>
           )}
 
-          {!resultado.cta_url && (
+          {!faixa.cta_url && (
             <Botao onClick={avancar} tema={tema} variant="primario">
               {config.cta || 'Continuar'}
             </Botao>
-          )}
-
-          {resultado.cta_url && (
-            <a
-              href={resultado.cta_url}
-              style={{
-                display: 'block',
-                width: '100%',
-                textAlign: 'center',
-                padding: tema.botaoPaddingMobile || tema.botaoPadding || '18px 24px',
-                background: cor,
-                color: tema.modoEscuro ? tema.fundo : '#FFFFFF',
-                borderRadius: tema.botaoRaio || 14,
-                fontWeight: 700,
-                fontSize: 17,
-                textDecoration: 'none',
-                boxShadow: tema.botaoSombra || '0 4px 12px rgba(0,0,0,0.1)'
-              }}
-            >
-              {resultado.cta_texto || 'Continuar'}
-            </a>
           )}
         </>
       ) : (

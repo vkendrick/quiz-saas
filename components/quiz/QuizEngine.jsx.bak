@@ -185,6 +185,32 @@ export default function QuizEngine({ slug }) {
     });
   }, [blocoAtual, quiz]);
 
+  
+  // 🔽 Preload da imagem hero (acelera LCP)
+  useEffect(() => {
+    if (!quiz || !blocos || blocos.length === 0) return;
+
+    const primeiroBloco = blocos[0];
+    if (primeiroBloco.tipo !== 'intro') return;
+
+    const imagemHero = primeiroBloco.config?.imagem_url
+      || primeiroBloco.config?.antes_depois?.antes?.imagem_url;
+
+    if (!imagemHero) return;
+
+    // Evita duplicata
+    if (document.querySelector('link[data-hero-preload]')) return;
+
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = imagemHero;
+    link.setAttribute('fetchpriority', 'high');
+    link.setAttribute('data-hero-preload', '1');
+    document.head.appendChild(link);
+  }, [quiz, blocos]);
+
+
   const avancar = () => {
     setDirecao(1);
     if (indiceAtual < blocos.length - 1) {

@@ -137,6 +137,24 @@ export default function QuizEngine({ slug }) {
     return total;
   };
 
+  // 🔽 V2 — Calcula a categoria (fungo, encravada, trauma, fragilidade) vencedora
+  const calcularCategoriaVencedora = () => {
+    const pontos = {};
+    blocos.forEach(b => {
+      if (b.tipo !== 'pergunta' || !b.pergunta) return;
+      const resposta = respostas[b.pergunta.id];
+      if (!resposta) return;
+      const ids = Array.isArray(resposta) ? resposta : [resposta];
+      ids.forEach(opId => {
+        const op = b.pergunta.opcoes?.find(o => o.id === opId);
+        const cat = op?.metadata?.categoria;
+        if (cat) pontos[cat] = (pontos[cat] || 0) + (op.valor || 0);
+      });
+    });
+    const entries = Object.entries(pontos).sort((a, b) => b[1] - a[1]);
+    return entries[0]?.[0] || null;
+  };
+
   // Dispara conclusao quando chega na tela de oferta
   useEffect(() => {
     if (!blocoAtual || !quiz?.id) return;
@@ -353,7 +371,7 @@ export default function QuizEngine({ slug }) {
         return <BlocoCaptura {...props} onEnviar={registrarLead} />;
 
       case 'resultado':
-        return <BlocoResultado {...props} score={score} leadId={leadId} respostas={respostas} />;
+        return <BlocoResultado {...props} score={score} leadId={leadId} respostas={respostas} categoriaVencedora={calcularCategoriaVencedora()} />;
 
       case 'html':
         return <BlocoHTML {...props} />;
