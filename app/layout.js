@@ -17,8 +17,20 @@ export default function RootLayout({ children }) {
     .map(f => f.variable)
     .join(' ');
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
   return (
     <html lang="pt-BR" className={fontes}>
+      <head>
+        {supabaseUrl && (
+          <>
+            <link rel="preconnect" href={supabaseUrl} />
+            <link rel="dns-prefetch" href={supabaseUrl} />
+          </>
+        )}
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+      </head>
       <body>{children}</body>
     </html>
   );

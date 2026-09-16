@@ -1,3 +1,140 @@
+#!/bin/bash
+set -e
+
+echo "🚀 Iniciando otimizações..."
+
+# ============================================================
+# 1. PALETAS — Aumentar contraste (WCAG AA)
+# ============================================================
+echo "📁 1/5 — Ajustando contraste das paletas..."
+
+# Fundo claro — trocar cinzas por versões mais escuras
+sed -i "s/textoSuave: '#6B7280'/textoSuave: '#4B5563'/g" lib/design/paletas.js
+sed -i "s/textoSuave: '#64748B'/textoSuave: '#475569'/g" lib/design/paletas.js
+sed -i "s/textoSuave: '#92400E'/textoSuave: '#78350F'/g" lib/design/paletas.js
+sed -i "s/textoSuave: '#854D0E'/textoSuave: '#713F12'/g" lib/design/paletas.js
+sed -i "s/textoSuave: '#9F1239'/textoSuave: '#881337'/g" lib/design/paletas.js
+sed -i "s/textoSuave: '#0F766E'/textoSuave: '#115E59'/g" lib/design/paletas.js
+
+sed -i "s/textoRodape: '#9CA3AF'/textoRodape: '#6B7280'/g" lib/design/paletas.js
+sed -i "s/textoRodape: '#94A3B8'/textoRodape: '#64748B'/g" lib/design/paletas.js
+sed -i "s/textoRodape: '#BE185D'/textoRodape: '#9D174D'/g" lib/design/paletas.js
+sed -i "s/textoRodape: '#A16207'/textoRodape: '#854D0E'/g" lib/design/paletas.js
+sed -i "s/textoRodape: '#115E59'/textoRodape: '#134E4A'/g" lib/design/paletas.js
+
+# Paleta escuro-elegante — rodapé cinza claro demais sobre fundo escuro
+sed -i "s/textoRodape: '#525252'/textoRodape: '#737373'/g" lib/design/paletas.js
+
+echo "  ✅ Paletas ajustadas"
+
+# ============================================================
+# 2. NEXT.CONFIG — Remover next-on-pages (migrou pra OpenNext)
+# ============================================================
+echo "📁 2/5 — Atualizando next.config.js..."
+
+cat > next.config.js <<'EOF'
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: false,
+  images: { unoptimized: true },
+  transpilePackages: ['framer-motion'],
+  experimental: {
+    optimizePackageImports: ['framer-motion', 'recharts']
+  }
+};
+
+module.exports = nextConfig;
+EOF
+
+echo "  ✅ next.config.js limpo (sem next-on-pages)"
+
+# ============================================================
+# 3. LAYOUT — Preconnect Supabase + Unsplash
+# ============================================================
+echo "📁 3/5 — Atualizando app/layout.js..."
+
+cat > app/layout.js <<'EOF'
+import './globals.css';
+import { Inter, Poppins, Montserrat, Lato, Playfair_Display } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
+const poppins = Poppins({ subsets: ['latin'], weight: ['400','600','700','800'], variable: '--font-poppins', display: 'swap' });
+const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat', display: 'swap' });
+const lato = Lato({ subsets: ['latin'], weight: ['400','700','900'], variable: '--font-lato', display: 'swap' });
+const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
+
+export const metadata = {
+  title: 'Quiz SaaS',
+  description: 'Sistema de quiz dinâmico de alta conversão'
+};
+
+export default function RootLayout({ children }) {
+  const fontes = [inter, poppins, montserrat, lato, playfair]
+    .map(f => f.variable)
+    .join(' ');
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  return (
+    <html lang="pt-BR" className={fontes}>
+      <head>
+        {supabaseUrl && (
+          <>
+            <link rel="preconnect" href={supabaseUrl} />
+            <link rel="dns-prefetch" href={supabaseUrl} />
+          </>
+        )}
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
+}
+EOF
+
+echo "  ✅ layout.js com preconnect"
+
+# ============================================================
+# 4. IMAGENS — adicionar width/height/loading/decoding
+# ============================================================
+echo "📁 4/5 — Adicionando width/height nas imagens..."
+
+# BlocoIntro — img principal
+sed -i 's|<img\n              src={config.imagem_url}\n              alt="" decoding="async"|<img\n              src={config.imagem_url}\n              alt=""\n              width={400}\n              height={400}\n              decoding="async"|g' components/quiz/blocos/BlocoIntro.jsx 2>/dev/null || true
+
+# BlocoAntesDepois — img antes
+sed -i 's|<img\n              src={antes.imagem_url}\n              alt=""  loading="lazy" decoding="async"|<img\n              src={antes.imagem_url}\n              alt=""\n              width={400}\n              height={400}\n              loading="lazy"\n              decoding="async"|g' components/quiz/blocos/BlocoAntesDepois.jsx 2>/dev/null || true
+
+# BlocoAntesDepois — img depois
+sed -i 's|<img\n              src={depois.imagem_url}\n              alt=""  loading="lazy" decoding="async"|<img\n              src={depois.imagem_url}\n              alt=""\n              width={400}\n              height={400}\n              loading="lazy"\n              decoding="async"|g' components/quiz/blocos/BlocoAntesDepois.jsx 2>/dev/null || true
+
+# BlocoProvaSocial — img principal
+sed -i 's|<img\n          src={config.imagem_url}\n          alt=""\n          style={{ width: .100%., borderRadius: 16, marginBottom: 20 }}|<img\n          src={config.imagem_url}\n          alt=""\n          width={600}\n          height={400}\n          loading="lazy"\n          decoding="async"\n          style={{ width: "100%", borderRadius: 16, marginBottom: 20 }}|g' components/quiz/blocos/BlocoProvaSocial.jsx 2>/dev/null || true
+
+# BlocoResultado — img faixa
+sed -i 's|<img\n              src={faixa.imagem_url}\n              alt=""\n              loading="lazy"\n              style={{|<img\n              src={faixa.imagem_url}\n              alt=""\n              width={600}\n              height={400}\n              loading="lazy"\n              decoding="async"\n              style={{|g' components/quiz/blocos/BlocoResultado.jsx 2>/dev/null || true
+
+# BlocoOferta — img antes/depois (2 ocorrências)
+sed -i 's|<img\n              src={antesDepois.antes.imagem_url}\n              alt=""\n              loading="lazy"\n              decoding="async"|<img\n              src={antesDepois.antes.imagem_url}\n              alt=""\n              width={400}\n              height={400}\n              loading="lazy"\n              decoding="async"|g' components/quiz/blocos/BlocoOferta.jsx 2>/dev/null || true
+
+sed -i 's|<img\n              src={antesDepois.depois.imagem_url}\n              alt=""\n              loading="lazy"\n              decoding="async"|<img\n              src={antesDepois.depois.imagem_url}\n              alt=""\n              width={400}\n              height={400}\n              loading="lazy"\n              decoding="async"|g' components/quiz/blocos/BlocoOferta.jsx 2>/dev/null || true
+
+# BlocoOferta — img dos itens
+sed -i 's|<img\n                  src={item.imagem_url}\n                  alt="" decoding="async"\n                  loading="lazy"|<img\n                  src={item.imagem_url}\n                  alt=""\n                  width={100}\n                  height={100}\n                  decoding="async"\n                  loading="lazy"|g' components/quiz/blocos/BlocoOferta.jsx 2>/dev/null || true
+
+# BlocoLoading — img especialista
+sed -i 's|<img\n              src={config.especialista.imagem_url}\n              alt=""\n              loading="lazy"|<img\n              src={config.especialista.imagem_url}\n              alt=""\n              width={80}\n              height={80}\n              loading="lazy"|g' components/quiz/blocos/BlocoLoading.jsx 2>/dev/null || true
+
+echo "  ✅ Imagens ajustadas (ou ignoradas se já tinham)"
+
+# ============================================================
+# 5. METRICAS — Recharts lazy (dynamic import)
+# ============================================================
+echo "📁 5/5 — Convertendo Recharts para lazy load..."
+
+# Metricas.jsx
+cat > components/Metricas.jsx <<'EOF'
 'use client';
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
@@ -216,3 +353,21 @@ function agruparPorPergunta(rows) {
   });
   return Object.values(mapa);
 }
+EOF
+
+echo "  ✅ Metricas.jsx com lazy Recharts"
+
+# ============================================================
+# FIM
+# ============================================================
+echo ""
+echo "🎉 Otimizações aplicadas com sucesso!"
+echo ""
+echo "📋 Próximos passos:"
+echo "  1. git add . && git commit -m 'perf: otimizações de performance + contraste'"
+echo "  2. git push"
+echo "  3. Cloudflare → Caching → Purge Everything"
+echo ""
+echo "⚠️  Verifique manualmente:"
+echo "  - Comparativo page.js (recharts lazy)"
+echo "  - Imagens em BlocoPergunta.jsx e BlocoGrafico.jsx"
