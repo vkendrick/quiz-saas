@@ -14,9 +14,12 @@ const Campo = ({ label, children }) => (
 );
 
 export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
+  console.log('[FormBlocoPergunta] renderizou. versao 3. pergunta_id:', config.pergunta_id);
+
   const [perguntas, setPerguntas] = useState([]);
   const [pergunta, setPergunta] = useState(null);
   const [criando, setCriando] = useState(false);
+  const [carregando, setCarregando] = useState(false);
 
   const set = (patch) => onChange({ ...config, ...patch });
 
@@ -27,40 +30,46 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
       .select('id, texto, ordem, tipo, imagem_url')
       .eq('quiz_id', quiz.id)
       .order('ordem')
-      .then(({ data }) => setPerguntas(data || []));
+      .then(({ data, error }) => {
+        if (error) console.error('[FormBlocoPergunta] erro list:', error);
+        setPerguntas(data || []);
+      });
   };
 
-  const carregarPergunta = (perguntaId) => {
+  const carregarPergunta = async (perguntaId) => {
     if (!perguntaId) { setPergunta(null); return; }
-    supabase
+    setCarregando(true);
+    console.log('[FormBlocoPergunta] carregando pergunta:', perguntaId);
+    const { data, error } = await supabase
       .from('perguntas')
       .select('*, opcoes(*)')
       .eq('id', perguntaId)
-      .single()
-      .then(({ data }) => setPergunta(data));
+      .single();
+
+    if (error) {
+      console.error('[FormBlocoPergunta] erro load pergunta:', error);
+    } else {
+      console.log('[FormBlocoPergunta] pergunta carregada:', data);
+      setPergunta(data);
+    }
+    setCarregando(false);
   };
 
   useEffect(() => { carregarPerguntas(); /* eslint-disable-next-line */ }, [quiz?.id]);
-  useEffect(() => { carregarPergunta(config.pergunta_id); }, [config.pergunta_id]);
+  useEffect(() => { carregarPergunta(config.pergunta_id); /* eslint-disable-next-line */ }, [config.pergunta_id]);
 
-  // 🔽 Cria pergunta nova
   const handleCriarPergunta = async () => {
     if (!quiz?.id) return;
     setCriando(true);
     try {
       const texto = prompt('Texto da nova pergunta:', 'Nova pergunta?');
       if (!texto) { setCriando(false); return; }
-
       const proximaOrdem = perguntas.length > 0
         ? Math.max(...perguntas.map(p => p.ordem || 0)) + 1
         : 1;
-
       const nova = await criarPergunta(quiz.id, proximaOrdem, texto, 'unica');
-
-      // Cria 2 opções default pra não ficar vazia
       await criarOpcao(nova.id, 'Opção A', 1);
       await criarOpcao(nova.id, 'Opção B', 2);
-
       await carregarPerguntas();
       set({ pergunta_id: nova.id });
     } catch (e) {
@@ -70,7 +79,6 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
     }
   };
 
-  // 🔽 Salva alterações inline na pergunta
   const salvarPergunta = async (patch) => {
     if (!pergunta) return;
     await supabase.from('perguntas').update(patch).eq('id', pergunta.id);
@@ -78,7 +86,6 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
     carregarPerguntas();
   };
 
-  // 🔽 Salva alterações inline na opção
   const salvarOpcao = async (opcaoId, patch) => {
     await supabase.from('opcoes').update(patch).eq('id', opcaoId);
     carregarPergunta(pergunta.id);
@@ -93,6 +100,20 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
   const mudarTipo = async (novoTipo) => {
     if (!pergunta) return;
     await salvarPergunta({ tipo: novoTipo });
+  };
+
+  const criarNovaOpcao = async () => {
+    if (!pergunta) return;
+    const texto = prompt('Texto da nova opção:', 'Nova opção');
+    if (!texto) return;
+    await criarOpcao(pergunta.id, texto, 3);
+    carregarPergunta(pergunta.id);
+  };
+
+  const excluirOpcao = async (opcaoId) => {
+    if (!confirm('Excluir essa opção?')) return;
+    await supabase.from('opcoes').delete().eq('id', opcaoId);
+    carregarPergunta(pergunta.id);
   };
 
   return (
@@ -139,7 +160,15 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
         </button>
       </div>
 
-      {pergunta && (
+      {/* 🔽 DEBUG — mostra o estado */}
+      <div style={{
+        padding: 8, background: '#F9FAFB', borderRadius: 6,
+        fontSize: 11, color: '#6B7280', fontFamily: 'monospace'
+      }}>
+        debug: pergunta_id = {config.pergunta_id || 'vazio'} · pergunta carregada = {pergunta ? 'SIM' : 'NAO'} · carregando = {carregando ? 'sim' : 'nao'}
+      </div>
+
+      {pergunta ? (
         <>
           {/* TIPO */}
           <div>
@@ -159,9 +188,6 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
                 }}
               >
                 ⚪ Escolha única
-                <div style={{ fontSize: 10, fontWeight: 400, marginTop: 2 }}>
-                  Cliente marca 1 e avança
-                </div>
               </button>
               <button
                 type="button"
@@ -175,9 +201,6 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
                 }}
               >
                 ☑️ Múltipla escolha
-                <div style={{ fontSize: 10, fontWeight: 400, marginTop: 2 }}>
-                  Cliente marca várias + botão continuar
-                </div>
               </button>
             </div>
           </div>
@@ -203,8 +226,21 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
 
           {/* OPÇÕES */}
           <div>
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
-              Opções ({pergunta.opcoes?.length || 0})
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8
+            }}>
+              <span>Opções ({pergunta.opcoes?.length || 0})</span>
+              <button
+                type="button"
+                onClick={criarNovaOpcao}
+                style={{
+                  padding: '4px 10px', background: '#3B82F6', color: '#FFF',
+                  border: 'none', borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: 'pointer'
+                }}
+              >
+                + Adicionar opção
+              </button>
             </div>
             <div style={{ display: 'grid', gap: 8 }}>
               {pergunta.opcoes?.map(o => (
@@ -232,6 +268,21 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
                       title="Pontuação (1-5)"
                       style={{ ...input, width: 60, textAlign: 'center' }}
                     />
+                    <button
+                      type="button"
+                      onClick={() => excluirOpcao(o.id)}
+                      style={{
+                        padding: '0 10px',
+                        background: '#FEE2E2',
+                        color: '#DC2626',
+                        border: 'none',
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                        fontSize: 14
+                      }}
+                    >
+                      ×
+                    </button>
                   </div>
                   <SeletorImagem
                     valor={o.metadata?.imagem_url}
@@ -242,19 +293,18 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
               ))}
             </div>
           </div>
-
-          <div style={{
-            marginTop: 8, paddingTop: 12, borderTop: '1px solid #E5E7EB'
-          }}>
-            <a
-              href={`/admin/quizzes/${quiz.id}/perguntas`}
-              target="_blank"
-              style={{ color: '#3B82F6', fontSize: 12 }}
-            >
-              → Abrir editor completo de perguntas (criar/excluir opções em massa)
-            </a>
-          </div>
         </>
+      ) : (
+        <div style={{
+          padding: 20, background: '#FEF3C7', border: '1px solid #FDE68A',
+          borderRadius: 8, fontSize: 13, color: '#92400E', textAlign: 'center'
+        }}>
+          {carregando
+            ? 'Carregando pergunta...'
+            : config.pergunta_id
+              ? 'Erro ao carregar a pergunta. Veja o Console (F12).'
+              : 'Selecione uma pergunta acima pra editar'}
+        </div>
       )}
 
       <Campo label="HTML acima (opcional)">
@@ -276,5 +326,4 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
       </Campo>
     </div>
   );
-}// v1789550035
-// 1789550731
+}
