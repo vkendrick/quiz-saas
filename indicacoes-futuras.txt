@@ -1,0 +1,66 @@
+PROJETO https://chat.deepseek.com/a/chat/s/b2af0174-b09f-4e96-9d13-8b3d4f8b50a6
+
+PENDENTE — MÉDIO PRAZO
+4. Domínio próprio
+Comprar .com.br (Registro.br ~R$40/ano)
+
+Cloudflare → Workers → Custom Domains → apontar
+
+SSL automático
+
+5. Reset de senha por e-mail (Resend ou Supabase SMTP)
+Hoje não tem. Usuário esquece a senha → bloqueia.
+
+6. Webhook de compra real
+Hoje o cta_url aponta pra placeholders. Quando tiver checkout (Hotmart/Kiwify), configurar webhook.
+
+7. Backup automático do Supabase
+Plano grátis tem backup diário de 7 dias. Ativar e testar restore.
+
+🔵 PENDENTE — BAIXO PRAZO (quando escalar)
+8. Cloudflare R2 pra imagens
+Se passar de 5 GB/mês de egress:
+
+Migrar Storage → R2 (10 GB grátis + egress ilimitado)
+
+Economia: ~$5-15/mês em tráfego
+
+9. Job de limpeza de imagens órfãs
+Quando tiver muitas trocas:
+
+pg_cron semanal
+
+Compara imagens no Storage vs URLs em uso
+
+Deleta as não usadas
+
+10. Templates 2, 3, 4...
+Clonar os 6 quizzes prontos pra novos clientes.
+
+------------------
+A anon key exposta é o ponto mais urgente de segurança — resetar essa semana.
+
+O Supabase grátis aguenta ~500 leads/dia tranquilamente. Só migrar pra R2 quando passar de 5 GB/mês de banda.
+
+Os 6 quizzes já estão prontos — podem ser usados como demo pra captar clientes agora.
+
+A performance está no top 15% da web (score 88). Com o round 2, entra no top 5%.
+
+A arquitetura está escalável — de 10 a 1000 quizzes, sem mudar código.
+
+
+---------------
+MELHORIAS DE PRODUTO (backlog)
+UX/Conversão
+□ Preview em tempo real ao trocar paleta
+□ Duplicar quiz/pergunta/bloco
+□ Resultado ultra-personalizado (por combinação de respostas)
+□ Retargeting no abandono (Meta CAPI server-side)
+□ A/B test de headline da intro
+□ Exit-intent popup
+Admin
+□ Filtro por data no Kanban
+□ Bulk actions no CRM
+□ Export de métricas em CSV/PDF
+□ Roles (admin/vendedor)
+Infra

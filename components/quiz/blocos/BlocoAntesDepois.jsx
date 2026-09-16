@@ -24,8 +24,17 @@ export default function BlocoAntesDepois({ config, tema, avancar }) {
           {antes.imagem_url && (
             <img
               src={antes.imagem_url}
-              alt=""  loading="lazy" decoding="async"
-              style={{ width: '100%', borderRadius: 14, display: 'block' }}
+              alt=""
+              width={300}
+              height={300}
+              loading="lazy"
+              decoding="async"
+              style={{
+                width: '100%',
+                height: 'auto',
+                borderRadius: 14,
+                display: 'block'
+              }}
             />
           )}
         </div>
@@ -39,9 +48,16 @@ export default function BlocoAntesDepois({ config, tema, avancar }) {
           {depois.imagem_url && (
             <img
               src={depois.imagem_url}
-              alt=""  loading="lazy" decoding="async"
+              alt=""
+              width={300}
+              height={300}
+              loading="lazy"
+              decoding="async"
               style={{
-                width: '100%', borderRadius: 14, display: 'block',
+                width: '100%',
+                height: 'auto',
+                borderRadius: 14,
+                display: 'block',
                 boxShadow: `0 0 0 2px ${tema.destaque}`
               }}
             />

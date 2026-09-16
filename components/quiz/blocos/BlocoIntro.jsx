@@ -10,11 +10,19 @@ export default function BlocoIntro({ config = {}, tema = {}, avancar }) {
       {config.imagem_url && (
         <img
           src={config.imagem_url}
-          alt="" decoding="async"
-          loading="lazy"
+          alt=""
+          width={400}
+          height={400}
+          fetchpriority="high"
+          decoding="async"
           style={{
-            width: '100%', maxWidth: 380, borderRadius: 20,
-            marginBottom: 24, marginLeft: 'auto', marginRight: 'auto',
+            width: '100%',
+            height: 'auto',
+            maxWidth: 380,
+            borderRadius: 20,
+            marginBottom: 24,
+            marginLeft: 'auto',
+            marginRight: 'auto',
             display: 'block'
           }}
         />
@@ -46,7 +54,6 @@ export default function BlocoIntro({ config = {}, tema = {}, avancar }) {
         />
       )}
 
-      {/* Antes/Depois dentro da intro */}
       {antesDepois && antesDepois.antes && antesDepois.depois && (
         <div style={{
           display: 'grid',
@@ -63,9 +70,17 @@ export default function BlocoIntro({ config = {}, tema = {}, avancar }) {
             {antesDepois.antes.imagem_url && (
               <img
                 src={antesDepois.antes.imagem_url}
-                alt="" decoding="async"
+                alt=""
+                width={300}
+                height={300}
                 loading="lazy"
-                style={{ width: '100%', borderRadius: 14, display: 'block' }}
+                decoding="async"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  borderRadius: 14,
+                  display: 'block'
+                }}
               />
             )}
           </div>
@@ -77,10 +92,16 @@ export default function BlocoIntro({ config = {}, tema = {}, avancar }) {
             {antesDepois.depois.imagem_url && (
               <img
                 src={antesDepois.depois.imagem_url}
-                alt="" decoding="async"
+                alt=""
+                width={300}
+                height={300}
                 loading="lazy"
+                decoding="async"
                 style={{
-                  width: '100%', borderRadius: 14, display: 'block',
+                  width: '100%',
+                  height: 'auto',
+                  borderRadius: 14,
+                  display: 'block',
                   boxShadow: `0 0 0 2px ${tema.destaque}`
                 }}
               />

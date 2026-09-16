@@ -6,14 +6,79 @@ export default function SeletorImagem({ valor, onChange, pasta = 'quiz' }) {
   const [url, setUrl] = useState(valor || '');
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState(null);
+  const [tamanhoOriginal, setTamanhoOriginal] = useState(null);
+  const [tamanhoComprimido, setTamanhoComprimido] = useState(null);
 
   const aplicar = () => onChange(url.trim());
+
+  // 🔽 Redimensiona e comprime a imagem no cliente
+  const processarImagem = (file) => {
+    return new Promise((resolve, reject) => {
+      const MAX_LARGURA = 1200;
+      const MAX_ALTURA = 1200;
+      const QUALIDADE = 0.82;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+
+          // Calcula novas dimensões mantendo proporção
+          if (width > MAX_LARGURA || height > MAX_ALTURA) {
+            const ratio = Math.min(MAX_LARGURA / width, MAX_ALTURA / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+
+          // Desenha em canvas
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Converte pra WebP
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                reject(new Error('Falha ao comprimir imagem'));
+                return;
+              }
+              resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
+                type: 'image/webp'
+              }));
+            },
+            'image/webp',
+            QUALIDADE
+          );
+        };
+        img.onerror = () => reject(new Error('Imagem inválida'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+      reader.readAsDataURL(file);
+    });
+  };
 
   const upload = async (file) => {
     setErro(null);
     setEnviando(true);
+
     try {
-      const publicUrl = await uploadMedia(file, pasta);
+      // 🔽 Valida tamanho original (avisa se for gigante)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('Imagem maior que 10 MB. Reduza antes de subir.');
+      }
+
+      setTamanhoOriginal(file.size);
+
+      // 🔽 Comprime + redimensiona
+      const otimizada = await processarImagem(file);
+      setTamanhoComprimido(otimizada.size);
+
+      // 🔽 Upload
+      const publicUrl = await uploadMedia(otimizada, pasta);
       setUrl(publicUrl);
       onChange(publicUrl);
     } catch (e) {
@@ -22,6 +87,8 @@ export default function SeletorImagem({ valor, onChange, pasta = 'quiz' }) {
       setEnviando(false);
     }
   };
+
+  const kb = (bytes) => (bytes / 1024).toFixed(0) + ' KB';
 
   return (
     <div>
@@ -52,7 +119,7 @@ export default function SeletorImagem({ valor, onChange, pasta = 'quiz' }) {
           cursor: enviando ? 'wait' : 'pointer',
           fontWeight: 500
         }}>
-          {enviando ? 'Enviando…' : '📁 Upload'}
+          {enviando ? 'Otimizando...' : '📁 Upload'}
           <input
             type="file"
             accept="image/*"
@@ -71,6 +138,17 @@ export default function SeletorImagem({ valor, onChange, pasta = 'quiz' }) {
         }}>{erro}</div>
       )}
 
+      {tamanhoOriginal && tamanhoComprimido && (
+        <div style={{
+          fontSize: 11, color: '#059669',
+          background: '#F0FDF4', padding: '4px 10px',
+          borderRadius: 6, marginBottom: 8
+        }}>
+          ✅ Otimizado: {kb(tamanhoOriginal)} → {kb(tamanhoComprimido)}
+          ({Math.round((1 - tamanhoComprimido / tamanhoOriginal) * 100)}% menor)
+        </div>
+      )}
+
       {url && (
         <div style={{ position: 'relative', display: 'inline-block' }}>
           <img
@@ -83,7 +161,7 @@ export default function SeletorImagem({ valor, onChange, pasta = 'quiz' }) {
           />
           <button
             type="button"
-            onClick={() => { setUrl(''); onChange(''); }}
+            onClick={() => { setUrl(''); onChange(''); setTamanhoOriginal(null); setTamanhoComprimido(null); }}
             style={{
               position: 'absolute', top: -8, right: -8,
               width: 24, height: 24, borderRadius: '50%',
