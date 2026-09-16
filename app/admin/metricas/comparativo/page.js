@@ -2,15 +2,27 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getComparativo } from '@/lib/metricas';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+
+import dynamic from 'next/dynamic';
+
+const BarChart = dynamic(() => import('recharts').then(m => m.BarChart), { ssr: false });
+const Bar = dynamic(() => import('recharts').then(m => m.Bar), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then(m => m.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then(m => m.YAxis), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(m => m.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false });
+const Cell = dynamic(() => import('recharts').then(m => m.Cell), { ssr: false });
 
 export default function ComparativoPage() {
   const [dados, setDados] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const [chartsProntos, setChartsProntos] = useState(false);   // 🔽 aqui
 
   useEffect(() => {
     getComparativo().then(setDados).finally(() => setCarregando(false));
   }, []);
+
+  useEffect(() => { setChartsProntos(true); }, []);             // 🔽 aqui
 
   if (carregando) return <div style={{ padding: 40 }}>Carregando…</div>;
 
