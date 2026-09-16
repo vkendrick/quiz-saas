@@ -1,11 +1,8 @@
 import './globals.css';
-import { Inter, Poppins, Montserrat, Lato, Playfair_Display } from 'next/font/google';
+import { Inter, Poppins } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
-const poppins = Poppins({ subsets: ['latin'], weight: ['400','600','700','800'], variable: '--font-poppins', display: 'swap' });
-const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat', display: 'swap' });
-const lato = Lato({ subsets: ['latin'], weight: ['400','700','900'], variable: '--font-lato', display: 'swap' });
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
+const poppins = Poppins({ subsets: ['latin'], weight: ['400', '600', '700', '800'], variable: '--font-poppins', display: 'swap' });
 
 export const metadata = {
   title: 'Quiz SaaS',
@@ -13,19 +10,10 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const fontes = [inter, poppins, montserrat, lato, playfair]
-    .map(f => f.variable)
-    .join(' ');
-
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   return (
-    <html lang="pt-BR" className={fontes}>
-{/* 🔽 Preconnect e preload de recursos críticos */}
-<link rel="preconnect" href="https://fvobroatzddjijzyvuzt.supabase.co" />
-<link rel="dns-prefetch" href="https://fvobroatzddjijzyvuzt.supabase.co" />
-<link rel="preconnect" href="https://images.unsplash.com" />
-<link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <html lang="pt-BR" className={`${inter.variable} ${poppins.variable}`}>
       <head>
         {supabaseUrl && (
           <>
@@ -35,6 +23,7 @@ export default function RootLayout({ children }) {
         )}
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>" />
       </head>
       <body>{children}</body>
     </html>
