@@ -14,12 +14,11 @@ const Campo = ({ label, children }) => (
 );
 
 export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
-  console.log('[FormBlocoPergunta] renderizou. versao 3. pergunta_id:', config.pergunta_id);
-
   const [perguntas, setPerguntas] = useState([]);
   const [pergunta, setPergunta] = useState(null);
   const [criando, setCriando] = useState(false);
   const [carregando, setCarregando] = useState(false);
+  const [temRespostas, setTemRespostas] = useState(false);
 
   const set = (patch) => onChange({ ...config, ...patch });
 
@@ -29,6 +28,7 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
       .from('perguntas')
       .select('id, texto, ordem, tipo, imagem_url')
       .eq('quiz_id', quiz.id)
+      .or('ativa.is.null,ativa.eq.true')   // 🔽 só ativas
       .order('ordem')
       .then(({ data, error }) => {
         if (error) console.error('[FormBlocoPergunta] erro list:', error);
@@ -37,20 +37,27 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
   };
 
   const carregarPergunta = async (perguntaId) => {
-    if (!perguntaId) { setPergunta(null); return; }
+    if (!perguntaId) { setPergunta(null); setTemRespostas(false); return; }
     setCarregando(true);
-    console.log('[FormBlocoPergunta] carregando pergunta:', perguntaId);
     const { data, error } = await supabase
       .from('perguntas')
-      .select('*, opcoes!opcoes_pergunta_id_fkey(*)')   // ← especifica a FK
+      .select('*, opcoes!opcoes_pergunta_id_fkey(*)')
       .eq('id', perguntaId)
       .single();
 
     if (error) {
       console.error('[FormBlocoPergunta] erro load pergunta:', error);
     } else {
-      console.log('[FormBlocoPergunta] pergunta carregada:', data);
       setPergunta(data);
+
+      // 🔽 Verifica se tem respostas registradas
+      const { count } = await supabase
+        .from('eventos')
+        .select('*', { count: 'exact', head: true })
+        .eq('pergunta_id', perguntaId)
+        .eq('tipo', 'resposta');
+
+      setTemRespostas((count || 0) > 0);
     }
     setCarregando(false);
   };
@@ -116,12 +123,60 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
     carregarPergunta(pergunta.id);
   };
 
+  // 🔽 EXCLUIR ou INATIVAR (dinâmico)
+  const handleRemoverPergunta = async () => {
+    if (!pergunta) return;
+
+    // Caso 1 — Tem respostas → só inativa
+    if (temRespostas) {
+      const c = confirm(
+        `⚠️ Essa pergunta já tem respostas registradas.\n\n` +
+        `Ela será INATIVADA (não aparece mais no quiz), mas o histórico fica preservado.\n\n` +
+        `Deseja continuar?`
+      );
+      if (!c) return;
+
+      try {
+        await supabase.from('perguntas')
+          .update({ ativa: false, inativada_em: new Date().toISOString() })
+          .eq('id', pergunta.id);
+
+        setPergunta(null);
+        setTemRespostas(false);
+        set({ pergunta_id: '' });
+        carregarPerguntas();
+      } catch (e) {
+        alert('Erro ao inativar: ' + e.message);
+      }
+      return;
+    }
+
+    // Caso 2 — Sem respostas → pode excluir de verdade
+    const c = confirm(
+      `Excluir essa pergunta?\n\n` +
+      `Isso remove a pergunta e as opções dela permanentemente.\n\n` +
+      `(Ela ainda não tem respostas, então não perde histórico.)`
+    );
+    if (!c) return;
+
+    try {
+      // Remove primeiro as opções (por segurança, se não tiver cascade)
+      await supabase.from('opcoes').delete().eq('pergunta_id', pergunta.id);
+      await supabase.from('perguntas').delete().eq('id', pergunta.id);
+      setPergunta(null);
+      set({ pergunta_id: '' });
+      carregarPerguntas();
+    } catch (e) {
+      alert('Erro ao excluir: ' + e.message);
+    }
+  };
+
   return (
     <div style={{ display: 'grid', gap: 12 }}>
 
-      {/* SELETOR DE PERGUNTA + BOTÃO CRIAR */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-        <label style={{ flex: 1 }}>
+      {/* SELETOR DE PERGUNTA + BOTÕES */}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+        <label style={{ flex: 1, minWidth: 200 }}>
           <div style={{ fontSize: 12, fontWeight: 500, color: '#374151', marginBottom: 4 }}>
             Pergunta vinculada
           </div>
@@ -139,6 +194,7 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
             ))}
           </select>
         </label>
+
         <button
           type="button"
           onClick={handleCriarPergunta}
@@ -158,14 +214,31 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
         >
           {criando ? 'Criando...' : '+ Nova pergunta'}
         </button>
-      </div>
 
-      {/* 🔽 DEBUG — mostra o estado */}
-      <div style={{
-        padding: 8, background: '#F9FAFB', borderRadius: 6,
-        fontSize: 11, color: '#6B7280', fontFamily: 'monospace'
-      }}>
-        debug: pergunta_id = {config.pergunta_id || 'vazio'} · pergunta carregada = {pergunta ? 'SIM' : 'NAO'} · carregando = {carregando ? 'sim' : 'nao'}
+        {/* 🔽 Botão dinâmico: Inativar ou Excluir */}
+        {pergunta && (
+          <button
+            type="button"
+            onClick={handleRemoverPergunta}
+            style={{
+              padding: '9px 14px',
+              background: temRespostas ? '#FEF3C7' : '#FEE2E2',
+              color: temRespostas ? '#92400E' : '#DC2626',
+              border: 'none',
+              borderRadius: 8,
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              height: 38
+            }}
+            title={temRespostas
+              ? 'Essa pergunta tem respostas, então só pode ser inativada'
+              : 'Essa pergunta ainda não tem respostas, pode ser excluída'}
+          >
+            {temRespostas ? '🚫 Inativar' : '🗑️ Excluir'}
+          </button>
+        )}
       </div>
 
       {pergunta ? (

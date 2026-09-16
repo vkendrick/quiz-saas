@@ -135,15 +135,27 @@ export default function BlocoPergunta({
         />
       )}
 
-      {pergunta.imagem_url && (
-        <img
-          src={pergunta.imagem_url}
-          alt=""
-          loading="lazy"
-          style={{ width: '100%', borderRadius: 16, marginBottom: 20 }}
-        />
-      )}
-
+{pergunta.imagem_url && (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: 20
+  }}>
+    <img
+      src={pergunta.imagem_url}
+      alt=""
+      loading="lazy"
+      style={{
+        maxWidth: '100%',
+        maxHeight: 180,
+        width: 'auto',
+        height: 'auto',
+        borderRadius: 12,
+        objectFit: 'contain'
+      }}
+    />
+  </div>
+)}
       {/* Grid */}
       <div style={
         todasTemImagem
