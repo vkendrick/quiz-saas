@@ -1,8 +1,13 @@
 name = "quiz-saas"
-main = ".open-next/worker.js"
-compatibility_date = "2024-12-30"
-compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+compatibility_date = "2024-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+main = ".vercel/output/static/_worker.js/index.js"
 
 [assets]
-directory = ".open-next/assets"
+directory = ".vercel/output/static"
 binding = "ASSETS"
+
+# 🔽 Não cachear HTML/RSC (eles apontam pra chunks com hash)
+[observability]
+enabled = true

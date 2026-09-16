@@ -27,7 +27,6 @@ const BlocoOferta = dynamic(() => import('./blocos/BlocoOferta'), { ssr: false }
 const BlocoGrafico = dynamic(() => import('./blocos/BlocoGrafico'), { ssr: false });
 const RelatorioDiagnostico = dynamic(() => import('./blocos/RelatorioDiagnostico'), { ssr: false });
 
-// Cache em memória — fora do componente, propositalmente
 const cache = new Map();
 
 export default function QuizEngine({ slug }) {
@@ -54,7 +53,6 @@ export default function QuizEngine({ slug }) {
       let q = null;
       let b = null;
 
-      // 1. Tenta do cache (só os dados, sem pular tracking)
       if (cache.has(cacheKey)) {
         const cached = cache.get(cacheKey);
         if (Date.now() - cached.timestamp < 5 * 60 * 1000) {
@@ -63,7 +61,6 @@ export default function QuizEngine({ slug }) {
         }
       }
 
-      // 2. Se não tinha no cache, busca do banco
       if (!q || !b) {
         try {
           const result = await getQuizCompleto(slug);
@@ -77,17 +74,14 @@ export default function QuizEngine({ slug }) {
         }
       }
 
-      // 3. Aplica os dados no estado
       setQuiz(q);
       setBlocos(b);
 
-      // 4. Se tem pular_intro, começa do primeiro bloco não-intro
       if (q.pular_intro) {
         const idx = b.findIndex(x => x.tipo !== 'intro');
         if (idx > 0) setIndiceAtual(idx);
       }
 
-      // 5. SEMPRE dispara tracking (mesmo vindo do cache)
       if (q?.id && !preview) {
         track(q.id, 'view');
         dispararEvento('quiz_view', { quiz: q.slug });
@@ -143,17 +137,12 @@ export default function QuizEngine({ slug }) {
     return total;
   };
 
-  useEffect(() => {
-    console.log('[QuizEngine] blocoAtual mudou para:', blocoAtual?.tipo);
-  }, [blocoAtual]);
-
   // Dispara conclusao quando chega na tela de oferta
   useEffect(() => {
     if (!blocoAtual || !quiz?.id) return;
     if (blocoAtual.tipo !== 'oferta') return;
     if (isPreview()) return;
 
-    // Só dispara uma vez por sessão
     const chave = `conclusao-disparada-${quiz.id}`;
     if (typeof window !== 'undefined' && sessionStorage.getItem(chave)) return;
     if (typeof window !== 'undefined') sessionStorage.setItem(chave, '1');
@@ -166,22 +155,17 @@ export default function QuizEngine({ slug }) {
 
   // Cria lead anônimo quando não tiver captura
   useEffect(() => {
-    // Só executa quando o bloco atual for 'oferta'
     if (!blocoAtual || !quiz?.id) return;
     if (blocoAtual.tipo !== 'oferta') return;
     if (isPreview()) return;
-
-    // Só se o quiz NÃO tiver captura
     if (!quiz.pular_captura) return;
 
-    // Evita criar mais de uma vez por sessão
     const chave = `lead-anonimo-criado-${quiz.id}`;
     if (typeof window !== 'undefined' && sessionStorage.getItem(chave)) return;
     if (typeof window !== 'undefined') sessionStorage.setItem(chave, '1');
 
     console.log('[QuizEngine] Criando lead anônimo...');
 
-    // Cria o lead anônimo
     salvarLead({
       quiz_id: quiz.id,
       nome: 'Anônimo',
@@ -197,7 +181,6 @@ export default function QuizEngine({ slug }) {
     })
     .catch(err => {
       console.error('[QuizEngine] ❌ Erro ao criar lead anônimo:', err);
-      // Se falhar, remove a trava pra tentar de novo
       if (typeof window !== 'undefined') sessionStorage.removeItem(chave);
     });
   }, [blocoAtual, quiz]);
@@ -216,99 +199,91 @@ export default function QuizEngine({ slug }) {
     }
   };
 
-const registrarResposta = (perguntaId, opcaoOuIds, info) => {
-  const preview = isPreview();
+  const registrarResposta = (perguntaId, opcaoOuIds, info) => {
+    const preview = isPreview();
 
-  let novoValor;
-  let valorAgregado = 0;
+    let novoValor;
+    let valorAgregado = 0;
 
-  // Detecta múltipla (array de ids)
-  if (Array.isArray(opcaoOuIds)) {
-    novoValor = opcaoOuIds;
-    valorAgregado = info?.valor_agregado || 0;
-  } else {
-    novoValor = opcaoOuIds;
-    // Soma o valor da opção única
-    const pergunta = blocos.find(b => b.tipo === 'pergunta' && b.pergunta?.id === perguntaId)?.pergunta;
-    const opcao = pergunta?.opcoes?.find(o => o.id === opcaoOuIds);
-    valorAgregado = opcao?.valor || 0;
-  }
-
-  const novas = { ...respostas, [perguntaId]: novoValor };
-  setRespostas(novas);
-
-  if (quiz?.id && !preview) {
-    // Se for múltipla, registra um evento por opção
     if (Array.isArray(opcaoOuIds)) {
-      opcaoOuIds.forEach(id => {
-        track(quiz.id, 'resposta', { pergunta_id: perguntaId, opcao_id: id });
-      });
+      novoValor = opcaoOuIds;
+      valorAgregado = info?.valor_agregado || 0;
     } else {
-      track(quiz.id, 'resposta', { pergunta_id: perguntaId, opcao_id: opcaoOuIds });
+      novoValor = opcaoOuIds;
+      const pergunta = blocos.find(b => b.tipo === 'pergunta' && b.pergunta?.id === perguntaId)?.pergunta;
+      const opcao = pergunta?.opcoes?.find(o => o.id === opcaoOuIds);
+      valorAgregado = opcao?.valor || 0;
     }
-  }
 
-  // Se a pergunta única tem branching, respeita
-  if (!Array.isArray(opcaoOuIds) && info?.proxima_pergunta) {
-    const idx = blocos.findIndex(b =>
-      b.tipo === 'pergunta' && b.pergunta?.id === info.proxima_pergunta
-    );
-    if (idx >= 0) {
-      setDirecao(1);
-      setIndiceAtual(idx);
-      return;
-    }
-  }
+    const novas = { ...respostas, [perguntaId]: novoValor };
+    setRespostas(novas);
 
-  // Avança
-  avancar();
-};
-
-
-const registrarLead = async (dados) => {
-  console.log('[QuizEngine] registrarLead iniciado:', dados);
-
-  const preview = isPreview();
-  const scoreCalculado = calcularScore();
-
-  let lead;
-  try {
-    lead = await salvarLead({
-      quiz_id: quiz.id,
-      nome: dados.nome,
-      email: dados.email,
-      telefone: dados.telefone,
-      respostas,
-      score: scoreCalculado
-    });
-    console.log('[QuizEngine] lead salvo com sucesso:', lead);
-  } catch (err) {
-    console.error('[QuizEngine] erro ao salvar lead:', err);
-    throw new Error('Não conseguimos salvar seus dados: ' + err.message);
-  }
-
-  if (!lead || !lead.id) {
-    console.error('[QuizEngine] salvarLead retornou sem id:', lead);
-    throw new Error('Resposta inválida do servidor');
-  }
-
-  setLeadId(lead.id);
-  setScore(scoreCalculado);
-
-  // Tracking do lead (conclusao dispara ao chegar na oferta)
-  try {
     if (quiz?.id && !preview) {
-      dispararEvento('quiz_lead', { quiz: quiz.slug, score: scoreCalculado });
-      try { window.fbq?.('track', 'Lead'); } catch {}
-      try { window.gtag?.('event', 'generate_lead', { value: scoreCalculado }); } catch {}
+      if (Array.isArray(opcaoOuIds)) {
+        opcaoOuIds.forEach(id => {
+          track(quiz.id, 'resposta', { pergunta_id: perguntaId, opcao_id: id });
+        });
+      } else {
+        track(quiz.id, 'resposta', { pergunta_id: perguntaId, opcao_id: opcaoOuIds });
+      }
     }
-  } catch (err) {
-    console.warn('[QuizEngine] tracking falhou (não crítico):', err);
-  }
 
-  // ✅ ESSA LINHA FALTAVA — avança pro próximo bloco (oferta)
-  avancar();
-};
+    if (!Array.isArray(opcaoOuIds) && info?.proxima_pergunta) {
+      const idx = blocos.findIndex(b =>
+        b.tipo === 'pergunta' && b.pergunta?.id === info.proxima_pergunta
+      );
+      if (idx >= 0) {
+        setDirecao(1);
+        setIndiceAtual(idx);
+        return;
+      }
+    }
+
+    avancar();
+  };
+
+  const registrarLead = async (dados) => {
+    console.log('[QuizEngine] registrarLead iniciado:', dados);
+
+    const preview = isPreview();
+    const scoreCalculado = calcularScore();
+
+    let lead;
+    try {
+      lead = await salvarLead({
+        quiz_id: quiz.id,
+        nome: dados.nome,
+        email: dados.email,
+        telefone: dados.telefone,
+        respostas,
+        score: scoreCalculado
+      });
+      console.log('[QuizEngine] lead salvo com sucesso:', lead);
+    } catch (err) {
+      console.error('[QuizEngine] erro ao salvar lead:', err);
+      throw new Error('Não conseguimos salvar seus dados: ' + err.message);
+    }
+
+    if (!lead || !lead.id) {
+      console.error('[QuizEngine] salvarLead retornou sem id:', lead);
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    setLeadId(lead.id);
+    setScore(scoreCalculado);
+
+    try {
+      if (quiz?.id && !preview) {
+        dispararEvento('quiz_lead', { quiz: quiz.slug, score: scoreCalculado });
+        try { window.fbq?.('track', 'Lead'); } catch {}
+        try { window.gtag?.('event', 'generate_lead', { value: scoreCalculado }); } catch {}
+      }
+    } catch (err) {
+      console.warn('[QuizEngine] tracking falhou (não crítico):', err);
+    }
+
+    avancar();
+  };
 
   const renderizarBloco = () => {
     if (!blocoAtual) return null;
@@ -363,23 +338,21 @@ const registrarLead = async (dados) => {
       case 'oferta':
         return <BlocoOferta {...props} leadId={leadId} />;
 
-case 'relatorio_diagnostico':
-  return <RelatorioDiagnostico {...props} />;
+      case 'relatorio_diagnostico':
+        return <RelatorioDiagnostico {...props} />;
 
-case 'grafico': {
-  const scoreMaximo = blocos.reduce((acc, b) => {
-    if (b.tipo !== 'pergunta' || !b.pergunta) return acc;
-    const valores = (b.pergunta.opcoes || []).map(o => o.valor || 0);
-    if (b.pergunta.tipo === 'multipla') {
-      // Múltipla: soma dos 3 maiores valores (aproximação)
-      const top = valores.sort((a, b) => b - a).slice(0, 3);
-      return acc + top.reduce((s, v) => s + v, 0);
-    }
-    // Única: maior valor
-    return acc + Math.max(...valores, 0);
-  }, 0);
-  return <BlocoGrafico {...props} score={calcularScore()} scoreMaximo={scoreMaximo} />;
-}
+      case 'grafico': {
+        const scoreMaximo = blocos.reduce((acc, b) => {
+          if (b.tipo !== 'pergunta' || !b.pergunta) return acc;
+          const valores = (b.pergunta.opcoes || []).map(o => o.valor || 0);
+          if (b.pergunta.tipo === 'multipla') {
+            const top = valores.sort((a, b) => b - a).slice(0, 3);
+            return acc + top.reduce((s, v) => s + v, 0);
+          }
+          return acc + Math.max(...valores, 0);
+        }, 0);
+        return <BlocoGrafico {...props} score={calcularScore()} scoreMaximo={scoreMaximo} />;
+      }
 
       default:
         return null;
@@ -396,14 +369,7 @@ case 'grafico': {
     <TelaFundo tema={tema}>
       <LogoTopo tema={tema} quiz={quiz} />
       <Pixels integracoes={quiz.integracoes} />
-<div style={{ width: '100%', maxWidth: tema.maxLargura || '560px' }}>
-  {blocoAtual?.tipo !== 'intro' && (
-    <BarraProgresso progresso={progresso} tema={tema} />
-  )}
-  <AnimatePresence mode="wait" custom={direcao}>
-    ...
-  </AnimatePresence>
-</div>
+
       <main
         style={{
           flex: 1,
@@ -414,6 +380,11 @@ case 'grafico': {
         }}
       >
         <div style={{ width: '100%', maxWidth: tema.maxLargura || '560px' }}>
+          {/* 🔽 Barra de progresso dentro do container centralizado */}
+          {blocoAtual?.tipo !== 'intro' && (
+            <BarraProgresso progresso={progresso} tema={tema} />
+          )}
+
           <AnimatePresence mode="wait" custom={direcao}>
             <motion.div
               key={blocoAtual.id}
