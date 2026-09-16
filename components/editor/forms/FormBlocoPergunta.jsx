@@ -277,3 +277,4 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
     </div>
   );
 }// v1789550035
+// 1789550731

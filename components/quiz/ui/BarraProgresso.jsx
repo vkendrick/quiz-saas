@@ -4,18 +4,15 @@ import { motion } from 'framer-motion';
 export default function BarraProgresso({ progresso = 0, tema = {} }) {
   const cor = tema.ctaCor || tema.destaque || '#0EA5E9';
   const corFundo = tema.progressoFundo || (tema.modoEscuro ? '#262626' : '#F3F4F6');
-
-  // Sempre pelo menos 5% visível
   const pct = Math.max(5, Math.min(100, progresso));
 
   return (
     <div style={{
       width: '100%',
-      height: 10,
+      height: 8,
       background: corFundo,
-      borderRadius: 5,
-      overflow: 'hidden',
-      marginBottom: 24
+      borderRadius: 4,
+      overflow: 'hidden'
     }}>
       <motion.div
         initial={{ width: 0 }}
@@ -24,7 +21,7 @@ export default function BarraProgresso({ progresso = 0, tema = {} }) {
         style={{
           height: '100%',
           background: `linear-gradient(90deg, ${cor}, ${cor}dd)`,
-          borderRadius: 5
+          borderRadius: 4
         }}
       />
     </div>

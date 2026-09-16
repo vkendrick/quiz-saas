@@ -382,7 +382,9 @@ export default function QuizEngine({ slug }) {
         <div style={{ width: '100%', maxWidth: tema.maxLargura || '560px' }}>
           {/* 🔽 Barra de progresso dentro do container centralizado */}
           {blocoAtual?.tipo !== 'intro' && (
-            <BarraProgresso progresso={progresso} tema={tema} />
+    <div style={{ height: 34, display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+      <BarraProgresso progresso={progresso} tema={tema} />
+    </div>
           )}
 
           <AnimatePresence mode="wait" custom={direcao}>
