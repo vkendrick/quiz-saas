@@ -495,7 +495,7 @@ export default function BlocoOferta({ config = {}, tema = {}, quiz, leadId }) {
               {item.imagem_url ? (
                 <img
                   src={item.imagem_url}
-                  alt=""
+                  alt="" decoding="async"
                   loading="lazy"
                   style={{
                     width: 72, height: 72, objectFit: 'cover',

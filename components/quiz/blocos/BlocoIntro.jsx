@@ -10,7 +10,7 @@ export default function BlocoIntro({ config = {}, tema = {}, avancar }) {
       {config.imagem_url && (
         <img
           src={config.imagem_url}
-          alt=""
+          alt="" decoding="async"
           loading="lazy"
           style={{
             width: '100%', maxWidth: 380, borderRadius: 20,
@@ -63,7 +63,7 @@ export default function BlocoIntro({ config = {}, tema = {}, avancar }) {
             {antesDepois.antes.imagem_url && (
               <img
                 src={antesDepois.antes.imagem_url}
-                alt=""
+                alt="" decoding="async"
                 loading="lazy"
                 style={{ width: '100%', borderRadius: 14, display: 'block' }}
               />
@@ -77,7 +77,7 @@ export default function BlocoIntro({ config = {}, tema = {}, avancar }) {
             {antesDepois.depois.imagem_url && (
               <img
                 src={antesDepois.depois.imagem_url}
-                alt=""
+                alt="" decoding="async"
                 loading="lazy"
                 style={{
                   width: '100%', borderRadius: 14, display: 'block',

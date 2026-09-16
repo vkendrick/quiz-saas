@@ -396,7 +396,14 @@ case 'grafico': {
     <TelaFundo tema={tema}>
       <LogoTopo tema={tema} quiz={quiz} />
       <Pixels integracoes={quiz.integracoes} />
-      <BarraProgresso progresso={progresso} tema={tema} />
+<div style={{ width: '100%', maxWidth: tema.maxLargura || '560px' }}>
+  {blocoAtual?.tipo !== 'intro' && (
+    <BarraProgresso progresso={progresso} tema={tema} />
+  )}
+  <AnimatePresence mode="wait" custom={direcao}>
+    ...
+  </AnimatePresence>
+</div>
       <main
         style={{
           flex: 1,
