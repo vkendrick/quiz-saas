@@ -42,7 +42,7 @@ export default function FormBlocoPergunta({ config = {}, onChange, quiz }) {
     console.log('[FormBlocoPergunta] carregando pergunta:', perguntaId);
     const { data, error } = await supabase
       .from('perguntas')
-      .select('*, opcoes(*)')
+      .select('*, opcoes!opcoes_pergunta_id_fkey(*)')   // ← especifica a FK
       .eq('id', perguntaId)
       .single();
 
