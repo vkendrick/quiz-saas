@@ -1,7 +1,10 @@
 'use client';
+import SeletorImagem from '../SeletorImagem';
 
 export default function FormBlocoLoading({ config, onChange }) {
   const set = (patch) => onChange({ ...config, ...patch });
+  const esp = config.especialista || {};
+  const setEsp = (patch) => set({ especialista: { ...esp, ...patch } });
   return (
     <div style={{ display: 'grid', gap: 12 }}>
       <Campo label="Título">
@@ -18,6 +21,28 @@ export default function FormBlocoLoading({ config, onChange }) {
           onChange={e => set({ duracao_segundos: parseInt(e.target.value) })}
           style={input} />
       </Campo>
+      <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: 12 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
+          👩‍⚕️ Especialista (aparece durante o loading)
+        </div>
+        <div style={{ display: 'grid', gap: 12 }}>
+          <Campo label="Chapeu (ex: Enquanto isso, conheça)">
+            <input value={esp.chapeu || ''} onChange={e => setEsp({ chapeu: e.target.value })}
+              style={input} placeholder="Enquanto isso, conheça" />
+          </Campo>
+          <Campo label="Nome">
+            <input value={esp.nome || ''} onChange={e => setEsp({ nome: e.target.value })}
+              style={input} placeholder="Nome do especialista" />
+          </Campo>
+          <Campo label="Bio">
+            <textarea value={esp.bio || ''} onChange={e => setEsp({ bio: e.target.value })}
+              rows={2} style={textarea} placeholder="Quem é e como vai ajudar" />
+          </Campo>
+          <Campo label="Foto">
+            <SeletorImagem valor={esp.imagem_url} onChange={v => setEsp({ imagem_url: v })} pasta="especialista" />
+          </Campo>
+        </div>
+      </div>
       <Campo label="HTML extra">
         <textarea value={config.html_livre || ''} onChange={e => set({ html_livre: e.target.value })} rows={3} style={textarea} />
       </Campo>

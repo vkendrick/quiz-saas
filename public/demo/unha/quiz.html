@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz – Diagnóstico da Sua Unha</title>
+<style>
+  :root {
+    --verde: #1a7a5e;
+    --verde-claro: #e8f5f0;
+    --verde-medio: #2eaa84;
+    --texto: #1a1a1a;
+    --texto-suave: #555;
+    --borda: #d0e8df;
+    --fundo: #f7faf9;
+    --branco: #ffffff;
+    --alerta: #c0392b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Georgia', serif;
+    background: var(--fundo);
+    color: var(--texto);
+    min-height: 100vh;
+  }
+  .lang-bar {
+    background: var(--verde);
+    padding: 10px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .lang-btn {
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    color: white;
+    padding: 4px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    transition: background 0.2s;
+  }
+  .lang-btn.ativo { background: rgba(255,255,255,0.25); border-color: white; }
+  .lang-btn:hover { background: rgba(255,255,255,0.2); }
+
+  .hero {
+    background: var(--verde);
+    color: white;
+    text-align: center;
+    padding: 48px 24px 56px;
+  }
+  .hero-tag {
+    font-size: 12px;
+    letter-spacing: 2px;
+    opacity: 0.75;
+    font-family: sans-serif;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(24px, 5vw, 40px);
+    font-weight: normal;
+    line-height: 1.25;
+    max-width: 680px;
+    margin: 0 auto 16px;
+  }
+  .hero p {
+    font-family: sans-serif;
+    font-size: 16px;
+    opacity: 0.85;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  .quiz-wrap {
+    max-width: 680px;
+    margin: -28px auto 0;
+    padding: 0 16px 60px;
+  }
+  .card {
+    background: var(--branco);
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid var(--borda);
+  }
+
+  .progresso-wrap {
+    margin-bottom: 24px;
+  }
+  .progresso-label {
+    font-family: sans-serif;
+    font-size: 13px;
+    color: var(--texto-suave);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .progresso-barra {
+    height: 5px;
+    background: var(--verde-claro);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progresso-fill {
+    height: 100%;
+    background: var(--verde-medio);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  .pergunta {
+    font-size: 20px;
+    line-height: 1.4;
+    margin-bottom: 24px;
+    color: var(--texto);
+  }
+  .subtexto {
+    font-family: sans-serif;
+    font-size: 14px;
+    color: var(--texto-suave);
+    margin-top: -16px;
+    margin-bottom: 22px;
+  }
+
+  .opcoes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .opcao {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1.5px solid var(--borda);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: sans-serif;
+    font-size: 15px;
+    color: var(--texto);
+    background: var(--branco);
+    text-align: left;
+  }
+  .opcao:hover { border-color: var(--verde-medio); background: var(--verde-claro); }
+  .opcao.selecionada { border-color: var(--verde); background: var(--verde-claro); }
+  .opcao-letra {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--verde-claro);
+    color: var(--verde);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 13px;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+  }
+  .opcao.selecionada .opcao-letra {
+    background: var(--verde);
+    color: white;
+  }
+
+  .btn-avancar {
+    margin-top: 28px;
+    width: 100%;
+    padding: 16px;
+    background: var(--verde);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: sans-serif;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: none;
+  }
+  .btn-avancar:hover { background: #155f4a; }
+  .btn-avancar.visivel { display: block; }
+
+  .erro {
+    color: var(--alerta);
+    font-family: sans-serif;
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+  }
+  .erro.visivel { display: block; }
+
+  /* RESULTADO */
+  .resultado { display: none; }
+  .resultado.visivel { display: block; }
+  .resultado-icone {
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .resultado-badge {
+    display: inline-block;
+    background: var(--verde-claro);
+    color: var(--verde);
+    border: 1px solid var(--borda);
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-family: sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .resultado-titulo {
+    font-size: 26px;
+    line-height: 1.3;
+    margin-bottom: 12px;
+    color: var(--verde);
+  }
+  .resultado-desc {
+    font-family: sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--texto-suave);
+    margin-bottom: 24px;
+  }
+  .resultado-alertas {
+    background: var(--verde-claro);
+    border-left: 3px solid var(--verde-medio);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+  }
+  .resultado-alertas p {
+    font-family: sans-serif;
+    font-size: 14px;
+    color: var(--verde);
+    line-height: 1.7;
+  }
+  .cta-principal {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    background: var(--verde);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-family: sans-serif;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .cta-principal:hover { background: #155f4a; }
+  .cta-sec {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    color: var(--verde);
+    border: 1.5px solid var(--borda);
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: sans-serif;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: center;
+  }
+  .cta-sec:hover { background: var(--verde-claro); }
+
+  .recomecar {
+    text-align: center;
+    margin-top: 20px;
+    font-family: sans-serif;
+    font-size: 13px;
+    color: var(--texto-suave);
+  }
+  .recomecar a { color: var(--verde); cursor: pointer; text-decoration: underline; }
+
+  .quiz-ativo { display: block; }
+  .quiz-oculto { display: none; }
+</style>
+</head>
+<body>
+
+<div class="lang-bar">
+  <button class="lang-btn ativo" onclick="setLang('pt')">🇧🇷 PT</button>
+  <button class="lang-btn" onclick="setLang('es')">🇲🇽 ES</button>
+</div>
+
+<div class="hero">
+  <div class="hero-tag" id="hero-tag">Diagnóstico gratuito</div>
+  <h1 id="hero-titulo">O que está acontecendo com a sua unha?</h1>
+  <p id="hero-sub">Responda 5 perguntas e descubra o problema exato — e o protocolo certo para resolver.</p>
+</div>
+
+<div class="quiz-wrap">
+  <div class="card">
+
+    <!-- QUIZ -->
+    <div id="quiz-bloco" class="quiz-ativo">
+      <div class="progresso-wrap">
+        <div class="progresso-label">
+          <span id="prog-texto">Pergunta 1 de 5</span>
+          <span id="prog-pct">0%</span>
+        </div>
+        <div class="progresso-barra">
+          <div class="progresso-fill" id="prog-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <p class="pergunta" id="pergunta-texto"></p>
+      <p class="subtexto" id="subtexto-texto"></p>
+      <div class="opcoes" id="opcoes-container"></div>
+      <div class="erro" id="msg-erro"></div>
+      <button class="btn-avancar" id="btn-avancar" onclick="avancar()"></button>
+    </div>
+
+    <!-- RESULTADO -->
+    <div id="resultado-bloco" class="resultado">
+      <div class="resultado-icone" id="res-icone"></div>
+      <div style="text-align:center">
+        <span class="resultado-badge" id="res-badge"></span>
+      </div>
+      <h2 class="resultado-titulo" id="res-titulo"></h2>
+      <p class="resultado-desc" id="res-desc"></p>
+      <div class="resultado-alertas">
+        <p id="res-alertas"></p>
+      </div>
+      <button class="cta-principal" id="res-cta1"></button>
+      <button class="cta-sec" id="res-cta2"></button>
+      <div class="recomecar">
+        <a onclick="reiniciar()" id="res-recomecar"></a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const conteudo = {
+  pt: {
+    heroTag: "Diagnóstico gratuito",
+    heroTitulo: "O que está acontecendo com a sua unha?",
+    heroSub: "Responda 5 perguntas e descubra o problema exato — e o protocolo certo para resolver.",
+    progTexto: (a, t) => `Pergunta ${a} de ${t}`,
+    btnAvancar: "Próxima pergunta →",
+    btnFinalizar: "Ver meu diagnóstico →",
+    msgErro: "Selecione uma opção para continuar.",
+    recomecar: "Refazer o quiz",
+    perguntas: [
+      {
+        texto: "Como está a cor da sua unha?",
+        subtexto: "Olhe bem para a unha afetada.",
+        opcoes: [
+          { letra: "A", texto: "Amarela ou marrom", pontos: { fungo: 3 } },
+          { letra: "B", texto: "Branca com manchas opacas", pontos: { fungo: 2, trauma: 1 } },
+          { letra: "C", texto: "Escura / preta / azulada", pontos: { trauma: 3 } },
+          { letra: "D", texto: "Cor normal, mas com outras mudanças", pontos: { encravada: 1, fragilidade: 1 } },
+        ]
+      },
+      {
+        texto: "A textura da sua unha mudou?",
+        subtexto: "Pense em como ela parece ao toque.",
+        opcoes: [
+          { letra: "A", texto: "Ficou grossa e dura", pontos: { fungo: 3 } },
+          { letra: "B", texto: "Está quebradiça ou descascando", pontos: { fragilidade: 3 } },
+          { letra: "C", texto: "Parece normal, mas dói ao pressionar", pontos: { encravada: 3 } },
+          { letra: "D", texto: "Não mudou muito", pontos: { fungo: 1 } },
+        ]
+      },
+      {
+        texto: "Você sente alguma dor ou desconforto?",
+        subtexto: "Seja honesta — até dores leves contam.",
+        opcoes: [
+          { letra: "A", texto: "Dor lateral / nas bordas da unha", pontos: { encravada: 3 } },
+          { letra: "B", texto: "Sensação de pressão ou ardência", pontos: { fungo: 2, encravada: 1 } },
+          { letra: "C", texto: "Dor após pancada recente", pontos: { trauma: 3 } },
+          { letra: "D", texto: "Nenhuma dor", pontos: { fungo: 1, fragilidade: 1 } },
+        ]
+      },
+      {
+        texto: "Há quanto tempo você está com esse problema?",
+        subtexto: "Doenças antigas precisam de protocolos diferentes.",
+        opcoes: [
+          { letra: "A", texto: "Menos de 2 semanas", pontos: { trauma: 2 } },
+          { letra: "B", texto: "Entre 1 e 3 meses", pontos: { fungo: 2, encravada: 1 } },
+          { letra: "C", texto: "Mais de 3 meses", pontos: { fungo: 3, fragilidade: 1 } },
+          { letra: "D", texto: "Não sei — sempre foi assim", pontos: { fragilidade: 2 } },
+        ]
+      },
+      {
+        texto: "Em que situações você frequenta com os pés?",
+        subtexto: "Ambiente influencia muito no tipo de problema.",
+        opcoes: [
+          { letra: "A", texto: "Academia, piscina ou vestiário", pontos: { fungo: 3 } },
+          { letra: "B", texto: "Calçados apertados no trabalho", pontos: { encravada: 2, trauma: 1 } },
+          { letra: "C", texto: "Pouco movimento, fico muito em casa", pontos: { fragilidade: 2 } },
+          { letra: "D", texto: "Nenhuma das anteriores", pontos: { fungo: 1 } },
+        ]
+      }
+    ],
+    resultados: {
+      fungo: {
+        icone: "🦠",
+        badge: "Diagnóstico: Fungo (Onicomicose)",
+        titulo: "Sua unha tem sinais claros de infecção fúngica.",
+        desc: "A onicomicose é a causa mais comum de unhas amarelas, grossas e deformadas. A boa notícia: existe um protocolo natural com óleos específicos que elimina o fungo da raiz — sem receita, sem farmácia cara.",
+        alertas: "⚠️ Sem tratamento, o fungo se espalha para outras unhas e pode contaminar familiares. Quanto mais cedo você agir, mais rápido recupera a unha saudável.",
+        cta1: "Quero o protocolo completo agora →",
+        cta2: "Entender mais sobre o meu caso"
+      },
+      encravada: {
+        icone: "😣",
+        badge: "Diagnóstico: Unha encravada",
+        titulo: "Sua unha está crescendo para dentro da pele.",
+        desc: "A unha encravada causa dor lateral progressiva e pode infeccionar se não tratada. Existe um método específico para cortar e redirecionar o crescimento — sem precisar ir ao podólogo toda semana.",
+        alertas: "⚠️ Evite cortar a curvatura da unha com tesoura. Isso piora o encravamento. O protocolo correto inverte o problema em 3 a 6 semanas.",
+        cta1: "Ver o protocolo para unha encravada →",
+        cta2: "Tenho dúvidas — quero saber mais"
+      },
+      trauma: {
+        icone: "🩹",
+        badge: "Diagnóstico: Trauma ungueal",
+        titulo: "Sua unha sofreu um impacto ou lesão recente.",
+        desc: "Unhas escuras ou azuladas após pancada são hematomas subungueais — sangue acumulado embaixo da lâmina. A maioria resolve sozinha, mas há cuidados essenciais para evitar infecção e perda da unha.",
+        alertas: "ℹ️ Se a dor for intensa ou a névoa escura crescer rapidamente, consulte um médico. Para casos leves, o protocolo de recuperação em casa funciona bem.",
+        cta1: "Ver os cuidados de recuperação →",
+        cta2: "Quero entender melhor o meu caso"
+      },
+      fragilidade: {
+        icone: "🌿",
+        badge: "Diagnóstico: Fragilidade ungueal",
+        titulo: "Sua unha está fraca e precisa de nutrição.",
+        desc: "Unhas quebradiças, descascando ou que não crescem indicam deficiência de nutrientes ou dano crônico da camada ungueal. Óleos específicos e ajustes de hábito restauram a estrutura da unha em 4 a 8 semanas.",
+        alertas: "ℹ️ A fragilidade ungueal é subestimada — mas pode evoluir para infecção fúngica se não tratada. Nutrir a unha é prevenir problemas maiores.",
+        cta1: "Ver o protocolo de nutrição ungueal →",
+        cta2: "Quero entender mais sobre meu caso"
+      }
+    }
+  },
+  es: {
+    heroTag: "Diagnóstico gratuito",
+    heroTitulo: "¿Qué le está pasando a tu uña?",
+    heroSub: "Responde 5 preguntas y descubre el problema exacto — y el protocolo correcto para resolverlo.",
+    progTexto: (a, t) => `Pregunta ${a} de ${t}`,
+    btnAvancar: "Siguiente pregunta →",
+    btnFinalizar: "Ver mi diagnóstico →",
+    msgErro: "Selecciona una opción para continuar.",
+    recomecar: "Repetir el quiz",
+    perguntas: [
+      {
+        texto: "¿De qué color está tu uña?",
+        subtexto: "Observa bien la uña afectada.",
+        opcoes: [
+          { letra: "A", texto: "Amarilla o marrón", pontos: { fungo: 3 } },
+          { letra: "B", texto: "Blanca con manchas opacas", pontos: { fungo: 2, trauma: 1 } },
+          { letra: "C", texto: "Oscura / negra / azulada", pontos: { trauma: 3 } },
+          { letra: "D", texto: "Color normal, pero con otros cambios", pontos: { encravada: 1, fragilidade: 1 } },
+        ]
+      },
+      {
+        texto: "¿Ha cambiado la textura de tu uña?",
+        subtexto: "Piensa en cómo se siente al tacto.",
+        opcoes: [
+          { letra: "A", texto: "Se volvió gruesa y dura", pontos: { fungo: 3 } },
+          { letra: "B", texto: "Se quiebra o se descama", pontos: { fragilidade: 3 } },
+          { letra: "C", texto: "Parece normal, pero duele al presionar", pontos: { encravada: 3 } },
+          { letra: "D", texto: "No cambió mucho", pontos: { fungo: 1 } },
+        ]
+      },
+      {
+        texto: "¿Sientes algún dolor o molestia?",
+        subtexto: "Sé honesta — hasta dolores leves cuentan.",
+        opcoes: [
+          { letra: "A", texto: "Dolor lateral / en los bordes de la uña", pontos: { encravada: 3 } },
+          { letra: "B", texto: "Sensación de presión o ardor", pontos: { fungo: 2, encravada: 1 } },
+          { letra: "C", texto: "Dolor tras un golpe reciente", pontos: { trauma: 3 } },
+          { letra: "D", texto: "Ningún dolor", pontos: { fungo: 1, fragilidade: 1 } },
+        ]
+      },
+      {
+        texto: "¿Cuánto tiempo llevas con este problema?",
+        subtexto: "Los problemas antiguos necesitan protocolos distintos.",
+        opcoes: [
+          { letra: "A", texto: "Menos de 2 semanas", pontos: { trauma: 2 } },
+          { letra: "B", texto: "Entre 1 y 3 meses", pontos: { fungo: 2, encravada: 1 } },
+          { letra: "C", texto: "Más de 3 meses", pontos: { fungo: 3, fragilidade: 1 } },
+          { letra: "D", texto: "No sé — siempre fue así", pontos: { fragilidade: 2 } },
+        ]
+      },
+      {
+        texto: "¿En qué entornos suelen estar tus pies?",
+        subtexto: "El entorno influye mucho en el tipo de problema.",
+        opcoes: [
+          { letra: "A", texto: "Gimnasio, piscina o vestuario", pontos: { fungo: 3 } },
+          { letra: "B", texto: "Zapatos apretados en el trabajo", pontos: { encravada: 2, trauma: 1 } },
+          { letra: "C", texto: "Poco movimiento, paso mucho tiempo en casa", pontos: { fragilidade: 2 } },
+          { letra: "D", texto: "Ninguna de las anteriores", pontos: { fungo: 1 } },
+        ]
+      }
+    ],
+    resultados: {
+      fungo: {
+        icone: "🦠",
+        badge: "Diagnóstico: Hongo (Onicomicosis)",
+        titulo: "Tu uña muestra señales claras de infección fúngica.",
+        desc: "La onicomicosis es la causa más común de uñas amarillas, gruesas y deformadas. La buena noticia: existe un protocolo natural con aceites específicos que elimina el hongo desde la raíz — sin receta, sin farmacia cara.",
+        alertas: "⚠️ Sin tratamiento, el hongo se extiende a otras uñas y puede contagiar a la familia. Cuanto antes actúes, más rápido recuperas una uña sana.",
+        cta1: "Quiero el protocolo completo ahora →",
+        cta2: "Entender más sobre mi caso"
+      },
+      encravada: {
+        icone: "😣",
+        badge: "Diagnóstico: Uña encarnada",
+        titulo: "Tu uña está creciendo hacia dentro de la piel.",
+        desc: "La uña encarnada causa dolor lateral progresivo y puede infectarse si no se trata. Existe un método específico para cortar y redirigir el crecimiento — sin ir al podólogo cada semana.",
+        alertas: "⚠️ Evita cortar la curvatura de la uña con tijeras. Eso empeora el problema. El protocolo correcto revierte la situación en 3 a 6 semanas.",
+        cta1: "Ver el protocolo para uña encarnada →",
+        cta2: "Tengo dudas — quiero saber más"
+      },
+      trauma: {
+        icone: "🩹",
+        badge: "Diagnóstico: Trauma ungueal",
+        titulo: "Tu uña sufrió un impacto o lesión reciente.",
+        desc: "Las uñas oscuras o azuladas tras un golpe son hematomas subungueales — sangre acumulada bajo la lámina. La mayoría se resuelve sola, pero hay cuidados esenciales para evitar infección y pérdida de la uña.",
+        alertas: "ℹ️ Si el dolor es intenso o la mancha oscura crece rápidamente, consulta a un médico. Para casos leves, el protocolo de recuperación en casa funciona bien.",
+        cta1: "Ver los cuidados de recuperación →",
+        cta2: "Quiero entender mejor mi caso"
+      },
+      fragilidade: {
+        icone: "🌿",
+        badge: "Diagnóstico: Fragilidad ungueal",
+        titulo: "Tu uña está débil y necesita nutrición.",
+        desc: "Uñas quebradizas, que se descaman o no crecen indican deficiencia de nutrientes o daño crónico de la capa ungueal. Aceites específicos y ajustes de hábito restauran la estructura en 4 a 8 semanas.",
+        alertas: "ℹ️ La fragilidad ungueal es subestimada — pero puede evolucionar a infección fúngica si no se trata. Nutrir la uña es prevenir problemas mayores.",
+        cta1: "Ver el protocolo de nutrición ungueal →",
+        cta2: "Quiero saber más sobre mi caso"
+      }
+    }
+  }
+};
+
+let lang = 'pt';
+let perguntaAtual = 0;
+let respostasSelecionadas = [];
+let opcaoSelecionada = null;
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('ativo'));
+  document.querySelector(`.lang-btn:${l === 'pt' ? 'first-child' : 'last-child'}`).classList.add('ativo');
+  reiniciar();
+}
+
+function renderPergunta() {
+  const c = conteudo[lang];
+  const p = c.perguntas[perguntaAtual];
+  const total = c.perguntas.length;
+  const pct = Math.round((perguntaAtual / total) * 100);
+
+  document.getElementById('hero-tag').textContent = c.heroTag;
+  document.getElementById('hero-titulo').textContent = c.heroTitulo;
+  document.getElementById('hero-sub').textContent = c.heroSub;
+  document.getElementById('prog-texto').textContent = c.progTexto(perguntaAtual + 1, total);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('pergunta-texto').textContent = p.texto;
+  document.getElementById('subtexto-texto').textContent = p.subtexto;
+
+  const isUltima = perguntaAtual === total - 1;
+  const btn = document.getElementById('btn-avancar');
+  btn.textContent = isUltima ? c.btnFinalizar : c.btnAvancar;
+  btn.classList.remove('visivel');
+  document.getElementById('msg-erro').classList.remove('visivel');
+
+  const container = document.getElementById('opcoes-container');
+  container.innerHTML = '';
+  opcaoSelecionada = null;
+
+  p.opcoes.forEach((op, i) => {
+    const div = document.createElement('button');
+    div.className = 'opcao';
+    div.innerHTML = `<span class="opcao-letra">${op.letra}</span><span>${op.texto}</span>`;
+    div.onclick = () => selecionarOpcao(i, div, op.pontos);
+    container.appendChild(div);
+  });
+}
+
+function selecionarOpcao(idx, el, pontos) {
+  document.querySelectorAll('.opcao').forEach(o => o.classList.remove('selecionada'));
+  el.classList.add('selecionada');
+  opcaoSelecionada = { idx, pontos };
+  document.getElementById('btn-avancar').classList.add('visivel');
+  document.getElementById('msg-erro').classList.remove('visivel');
+}
+
+function avancar() {
+  const c = conteudo[lang];
+  if (!opcaoSelecionada) {
+    const err = document.getElementById('msg-erro');
+    err.textContent = c.msgErro;
+    err.classList.add('visivel');
+    return;
+  }
+  respostasSelecionadas.push(opcaoSelecionada.pontos);
+  perguntaAtual++;
+  if (perguntaAtual >= c.perguntas.length) {
+    mostrarResultado();
+  } else {
+    renderPergunta();
+  }
+}
+
+function calcularDiagnostico() {
+  const totais = { fungo: 0, encravada: 0, trauma: 0, fragilidade: 0 };
+  respostasSelecionadas.forEach(r => {
+    Object.entries(r).forEach(([k, v]) => { totais[k] = (totais[k] || 0) + v; });
+  });
+  return Object.entries(totais).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function mostrarResultado() {
+  const c = conteudo[lang];
+  const diag = calcularDiagnostico();
+  const res = c.resultados[diag];
+
+  document.getElementById('res-icone').textContent = res.icone;
+  document.getElementById('res-badge').textContent = res.badge;
+  document.getElementById('res-titulo').textContent = res.titulo;
+  document.getElementById('res-desc').textContent = res.desc;
+  document.getElementById('res-alertas').textContent = res.alertas;
+  document.getElementById('res-cta1').textContent = res.cta1;
+  document.getElementById('res-cta2').textContent = res.cta2;
+  document.getElementById('res-recomecar').textContent = c.recomecar;
+
+  document.getElementById('quiz-bloco').classList.add('quiz-oculto');
+  document.getElementById('resultado-bloco').classList.add('visivel');
+
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+}
+
+function reiniciar() {
+  perguntaAtual = 0;
+  respostasSelecionadas = [];
+  opcaoSelecionada = null;
+  document.getElementById('quiz-bloco').classList.remove('quiz-oculto');
+  document.getElementById('resultado-bloco').classList.remove('visivel');
+  renderPergunta();
+}
+
+reiniciar();
+</script>
+<script>
+/* PRISMA bridge (aditivo: nao altera o validado acima) */
+(function(){
+  var VENDAS_URL = '/demo/unha/';
+  function vendas(){ location.href = VENDAS_URL + '?lang=' + lang + location.search.replace(/^\?/, '&'); }
+  ['res-cta1','res-cta2'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', vendas);
+  });
+  try {
+    var l = new URLSearchParams(location.search).get('lang');
+    if ((l === 'es' || l === 'pt') && window.setLang) setLang(l);
+  } catch(e){}
+})();
+</script>
+</body>
+</html>

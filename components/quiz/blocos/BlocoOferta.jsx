@@ -61,8 +61,40 @@ export default function BlocoOferta({ config = {}, tema = {}, quiz, leadId }) {
   const handleCtaClick = async (e) => {
     e.preventDefault();
 
-    const url = config.cta_url;
+    // Atribuição: carimba a origem (quiz) no link do checkout para o
+    // webhook devolver sck → dashboard cruza venda × anúncio.
+    let url = config.cta_url;
     if (!url) return;
+    const isPrev = typeof window !== 'undefined' && /[?&]preview=/.test(window.location.search);
+    try {
+      const u = new URL(url, typeof window !== 'undefined' ? window.location.origin : undefined);
+      if ((u.protocol === 'http:' || u.protocol === 'https:') && !u.searchParams.has('sck') && quiz?.slug) {
+        u.searchParams.set('sck', quiz.slug);
+      }
+      // UTMs da página → checkout (a Kiwify devolve no webhook → dashboard
+      // atribui venda × campanha; sem isso, Vendas/CPA por campanha zeram).
+      try {
+        const pg = new URL(window.location.href);
+        for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']) {
+          const v = pg.searchParams.get(k);
+          if (v && !u.searchParams.has(k)) u.searchParams.set(k, v);
+        }
+      } catch {}
+      // Match Meta (EMQ): leva fbc/fbp nos slots s1/s2 da Kiwify — o webhook
+      // devolve no TrackingParameters e o CAPI envia junto (só Kiwify).
+      if (u.hostname.includes('kiwify') && typeof document !== 'undefined') {
+        const ck = (n) => {
+          try {
+            const m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)'));
+            return m ? decodeURIComponent(m[2]) : null;
+          } catch { return null; }
+        };
+        const fbc = ck('_fbc'), fbp = ck('_fbp');
+        if (fbc && !u.searchParams.has('s1')) u.searchParams.set('s1', fbc);
+        if (fbp && !u.searchParams.has('s2')) u.searchParams.set('s2', fbp);
+      }
+      url = u.toString();
+    } catch {}
 
     // 🔽 Trava: só dispara evento UMA VEZ por sessão
     const chaveClique = `cta-clicado-${quiz?.id}`;
@@ -80,6 +112,21 @@ export default function BlocoOferta({ config = {}, tema = {}, quiz, leadId }) {
         }
       } catch (err) {
         console.warn('Erro ao registrar cta_clique:', err);
+      }
+      // Prisma dashboard: checkout iniciado (não bloqueia a navegação).
+      if (!isPrev && quiz?.slug) {
+        try {
+          const pg = new URL(window.location.href);
+          const q = (k) => pg.searchParams.get(k);
+          fetch('/api/prisma/track', { method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quiz_slug: quiz.slug, tipo: 'checkout',
+              utm_source: q('utm_source'), utm_medium: q('utm_medium'),
+              utm_campaign: q('utm_campaign'), utm_content: q('utm_content'),
+              utm_term: q('utm_term'),
+              metadata: { quiz_id: quiz.id } }),
+            keepalive: true }).catch(() => {});
+        } catch {}
       }
     }
 

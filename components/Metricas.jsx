@@ -1,50 +1,52 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { getMetricas } from '@/lib/metricas';
+import { getMetricas, getMetricasJanela, janelaOntem, janelaAnteontem, janelaDoPeriodo, PERIODOS, intervaloDoRotulo } from '@/lib/metricas';
 import { supabase } from '@/lib/supabase-browser';
-import { Card } from './ui';
+import FunilIdeal from './FunilIdeal';
 
-const BarChart = dynamic(() => import('recharts').then(m => m.BarChart), { ssr: false });
-const Bar = dynamic(() => import('recharts').then(m => m.Bar), { ssr: false });
-const XAxis = dynamic(() => import('recharts').then(m => m.XAxis), { ssr: false });
-const YAxis = dynamic(() => import('recharts').then(m => m.YAxis), { ssr: false });
-const Tooltip = dynamic(() => import('recharts').then(m => m.Tooltip), { ssr: false });
-const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false });
-const PieChart = dynamic(() => import('recharts').then(m => m.PieChart), { ssr: false });
-const Pie = dynamic(() => import('recharts').then(m => m.Pie), { ssr: false });
-const Cell = dynamic(() => import('recharts').then(m => m.Cell), { ssr: false });
-const Legend = dynamic(() => import('recharts').then(m => m.Legend), { ssr: false });
+const QuizCharts = dynamic(() => import('./QuizCharts'), {
+  ssr: false,
+  loading: () => <p className="text-xs text-gray-400 text-center">…</p>,
+});
 
-function limparMarcacoes(texto) {
-  if (!texto) return '';
-  return texto
-    .replace(/==/g, '')
-    .replace(/__/g, '')
-    .replace(/\*\*/g, '')
-    .replace(/\*/g, '')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-}
+const LBL = {
+  pt: { 'Últimas 2h': 'Últimas 2h', Hoje: 'Hoje', Ontem: 'Ontem', '24 horas': '24 horas', '7 dias': '7 dias', '30 dias': '30 dias', '90 dias': '90 dias' },
+  es: { 'Últimas 2h': 'Últimas 2h', Hoje: 'Hoy', Ontem: 'Ayer', '24 horas': '24 horas', '7 dias': '7 días', '30 dias': '30 días', '90 dias': '90 días' },
+};
+const CARDS = {
+  pt: ['Chegou', 'Começou', 'Concluiu', 'Clicou', 'Comprou', 'Taxa de conclusão'],
+  es: ['Llegó', 'Comenzó', 'Completó', 'Clic', 'Compró', 'Tasa de compleción'],
+};
 
-const CORES = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
-const PERIODOS = [
-  { label: '24 horas', value: '24 hours' },
-  { label: '7 dias', value: '7 days' },
-  { label: '30 dias', value: '30 days' },
-  { label: '90 dias', value: '90 days' }
-];
-
-export default function Metricas({ quizId }) {
-  const [periodo, setPeriodo] = useState('7 days');
+export default function Metricas({ quizId, periodo: periodoExt, onPeriodo, lang = 'pt' }) {
+  const T = (k) => (LBL[lang] || LBL.pt)[k] || k;
+  const [periodoInt, setPeriodoInt] = useState('7 dias');
+  const periodo = periodoExt ?? periodoInt;
+  const setPeriodo = onPeriodo ?? setPeriodoInt;
+  // Objeto memoizado: {de,ate} recriado a cada render causaria loop nos filhos.
+  const intervalo = useMemo(() => intervaloDoRotulo(periodo), [periodo]);
   const [m, setM] = useState(null);
   const [carregando, setCarregando] = useState(true);
-  const [chartsProntos, setChartsProntos] = useState(false);
 
-  useEffect(() => { setChartsProntos(true); }, []);
+  const [base, setBase] = useState(null); // janela de comparação (ontem/anteontem)
 
   const carregar = () => {
     setCarregando(true);
-    getMetricas(quizId, periodo).then(setM).finally(() => setCarregando(false));
+    const iv = intervalo;
+    if (iv && typeof iv === 'object' && iv.de) {
+      // Janela exata: busca atual + base de comparação no MESMO instante.
+      const ehOntem = periodo === 'Ontem';
+      const jb = ehOntem ? janelaAnteontem() : janelaOntem();
+      Promise.all([
+        getMetricasJanela(quizId, iv.de, iv.ate),
+        getMetricasJanela(quizId, jb.de, jb.ate),
+      ]).then(([atual, comparada]) => { setM(atual); setBase(comparada.resumo || null); })
+        .finally(() => setCarregando(false));
+    } else {
+      setBase(null);
+      getMetricas(quizId, iv).then(setM).finally(() => setCarregando(false));
+    }
   };
 
   useEffect(() => { carregar(); /* eslint-disable-next-line */ }, [quizId, periodo]);
@@ -57,117 +59,78 @@ export default function Metricas({ quizId }) {
     /* eslint-disable-next-line */
   }, [quizId, periodo]);
 
-  if (carregando && !m) return <div className="text-gray-400">Carregando métricas...</div>;
+  if (carregando && !m) return <div className="text-gray-400">{lang === 'es' ? 'Cargando métricas...' : 'Carregando métricas...'}</div>;
   if (!m) return null;
 
   const r = m.resumo || {};
 
   return (
     <div>
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-4">
         {PERIODOS.map(p => (
-          <button key={p.value} onClick={() => setPeriodo(p.value)}
-            className={`px-3 py-1.5 text-xs rounded-md border ${periodo === p.value ? 'bg-blue-600 text-white border-blue-600' : 'bg-white'}`}>
-            {p.label}
+          <button key={p.label} onClick={() => setPeriodo(p.label)}
+            className={`px-3 py-1.5 text-xs rounded-md border ${periodo === p.label ? 'bg-blue-600 text-white border-blue-600' : 'bg-white'}`}>
+            {T(p.label)}
           </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-5 gap-4 mb-6">
-        <Card titulo="Visitas e Acessos" valor={r.visualizacoes ?? '--'} />
-        <Card titulo="Respostas Iniciadas" valor={r.inicios ?? '--'} />
-        <Card titulo="Conclusões" valor={r.conclusoes ?? '--'} />
-        <Card titulo="Tempo Médio" valor={r.tempo_medio ? `${Math.round(r.tempo_medio)}ms` : '--'} />
-        <Card titulo="Taxa de Conclusão" valor={r.taxa_conclusao ? `${r.taxa_conclusao}%` : '--'} />
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
+        <div className="lg:col-span-2 grid grid-cols-2 gap-3 content-start">
+          <Kpi titulo={CARDS[lang][0]} valor={r.visualizacoes} base={base?.visualizacoes} lang={lang} />
+          <Kpi titulo={CARDS[lang][1]} valor={r.inicios} base={base?.inicios} lang={lang} />
+          <Kpi titulo={CARDS[lang][2]} valor={r.conclusoes} base={base?.conclusoes} lang={lang} />
+          <Kpi titulo={CARDS[lang][3]} valor={r.cliques} base={base?.cliques} lang={lang} />
+          <Kpi titulo={CARDS[lang][4]} valor={r.comprou} base={base?.comprou} lang={lang} />
+          <Kpi titulo={CARDS[lang][5]} valor={r.taxa_conclusao != null ? `${r.taxa_conclusao}%` : null} base={base?.taxa_conclusao != null ? `${base.taxa_conclusao}%` : null} numero={false} lang={lang} />
+        </div>
+        <div className="lg:col-span-3">
+          <FunilIdeal quizId={quizId} periodo={intervalo} resumo={r} lang={lang} />
+        </div>
       </div>
 
-      <section className="bg-white border rounded-lg p-5 mb-6">
-        <h3 className="font-semibold mb-4 text-sm text-center">Desempenho por pergunta</h3>
-        {m.funil.length === 0 ? <p className="text-xs text-gray-400 text-center">Sem dados ainda</p> : !chartsProntos ? (
-          <p className="text-xs text-gray-400 text-center">Carregando gráfico…</p>
-        ) : (
-          <div style={{ maxWidth: 720, margin: '0 auto' }}>
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={m.funil}>
-                <XAxis dataKey="ordem" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v, _n, p) => [v, limparMarcacoes(p.payload.texto)]} />
-                <Bar dataKey="responderam" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </section>
-
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <section className="bg-white border rounded-lg p-5">
-          <h3 className="font-semibold mb-4 text-sm text-center">Dispositivos</h3>
-          {m.dispositivos.length === 0 ? <p className="text-xs text-gray-400 text-center">Sem dados ainda</p> : !chartsProntos ? (
-            <p className="text-xs text-gray-400 text-center">Carregando…</p>
-          ) : (
-            <div style={{ maxWidth: 400, margin: '0 auto' }}>
-              <ResponsiveContainer width="100%" height={260}>
-                <PieChart>
-                  <Pie data={m.dispositivos} dataKey="total" nameKey="dispositivo" outerRadius={90}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                    {m.dispositivos.map((_, i) => <Cell key={i} fill={CORES[i % CORES.length]} />)}
-                  </Pie>
-                  <Legend /><Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </section>
-        <section className="bg-white border rounded-lg p-5">
-          <h3 className="font-semibold mb-4 text-sm">Melhores campanhas</h3>
-          {m.campanhas.length === 0 ? <p className="text-xs text-gray-400">Sem dados ainda</p> : (
-            <table className="w-full text-sm">
-              <tbody>
-                {m.campanhas.map((c, i) => (
-                  <tr key={i} className="border-b last:border-0">
-                    <td className="py-2 text-gray-600">{c.utm_campaign}</td>
-                    <td className="py-2 text-right font-medium">{c.leads}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
-      </div>
-
-      <section className="bg-white border rounded-lg p-5 mb-6">
-        <h3 className="font-semibold mb-4 text-sm text-center">Distribuição de respostas</h3>
-        {m.respostas.length === 0 ? <p className="text-xs text-gray-400 text-center">Sem dados ainda</p> : !chartsProntos ? (
-          <p className="text-xs text-gray-400 text-center">Carregando…</p>
-        ) : (
-          <div className="space-y-6">
-            {agruparPorPergunta(m.respostas).map((grupo, i) => (
-              <div key={i}>
-                <div className="text-xs font-semibold text-gray-700 mb-2 text-center">
-                  {limparMarcacoes(grupo.pergunta_texto)}
-                </div>
-                <div style={{ maxWidth: 620, margin: '0 auto' }}>
-                  <ResponsiveContainer width="100%" height={Math.max(140, grupo.opcoes.length * 45)}>
-                    <BarChart data={grupo.opcoes} layout="vertical">
-                      <XAxis type="number" tick={{ fontSize: 11 }} />
-                      <YAxis type="category" dataKey="opcao_texto" width={200} tick={{ fontSize: 11 }} />
-                      <Tooltip />
-                      <Bar dataKey="total" fill="#10B981" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-      <AbPanel dados={m.ab} />
+      <QuizCharts m={m} lang={lang} />
+      <AbPanel dados={m.ab} lang={lang} />
     </div>
   );
 }
 
-function AbPanel({ dados }) {
+function Kpi({ titulo, valor, base, numero = true, lang = 'pt' }) {
+  const n = (v) => (v == null || v === '' ? null : parseFloat(String(v).replace('%', '').replace(',', '.')));
+  const a = n(valor), b = n(base);
+  let pill = null;
+  if (a != null && b != null) {
+    if (numero) {
+      if (b > 0) {
+        const p = Math.round(1000 * (a - b) / b) / 10;
+        pill = p > 0 ? { t: `▲ +${p}%`, c: '#10B981', bg: '#ECFDF5' }
+          : p < 0 ? { t: `▼ ${p}%`, c: '#EF4444', bg: '#FEF2F2' }
+          : { t: '= 0%', c: '#9CA3AF', bg: '#F3F4F6' };
+      } else if (a > 0) pill = { t: '▲ novo', c: '#10B981', bg: '#ECFDF5' };
+    } else {
+      const pp = Math.round(10 * (a - b)) / 10;
+      pill = pp > 0 ? { t: `▲ +${pp}p.p.`, c: '#10B981', bg: '#ECFDF5' }
+        : pp < 0 ? { t: `▼ ${pp}p.p.`, c: '#EF4444', bg: '#FEF2F2' }
+        : { t: '= 0p.p.', c: '#9CA3AF', bg: '#F3F4F6' };
+    }
+  }
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg p-4">
+      <div className="text-xs text-gray-500">{titulo}</div>
+      <div className="flex items-center gap-2 mt-2">
+        <span className="text-2xl font-bold">{valor ?? '--'}</span>
+        {pill && <span style={{ fontSize: 11, fontWeight: 700, color: pill.c, background: pill.bg, borderRadius: 999, padding: '2px 8px', whiteSpace: 'nowrap' }}>{pill.t}</span>}
+      </div>
+      {b != null && <div className="text-xs text-gray-400 mt-1">{lang === 'es' ? 'ayer' : 'ontem'}: {base}</div>}
+    </div>
+  );
+}
+
+function AbPanel({ dados, lang = 'pt' }) {
   if (!dados || dados.length === 0) return null;
+  const T = lang === 'es'
+    ? { t: 'Prueba A/B de preguntas', v: 'Variante', r: 'Respuestas', c: 'Conclusiones', tx: 'Tasa' }
+    : { t: 'A/B test de perguntas', v: 'Variante', r: 'Respostas', c: 'Conclusões', tx: 'Taxa' };
   const grupos = {};
   dados.forEach(d => {
     if (!grupos[d.pergunta_id]) grupos[d.pergunta_id] = { texto: limparMarcacoes(d.pergunta_texto), variantes: [] };
@@ -176,7 +139,7 @@ function AbPanel({ dados }) {
 
   return (
     <section className="bg-white border rounded-lg p-5 mt-6">
-      <h3 className="font-semibold mb-4 text-sm">A/B test de perguntas</h3>
+      <h3 className="font-semibold mb-4 text-sm">{T.t}</h3>
       <div className="space-y-6">
         {Object.entries(grupos).map(([pid, g]) => (
           <div key={pid}>
@@ -184,10 +147,10 @@ function AbPanel({ dados }) {
             <table className="w-full text-sm border rounded">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="p-2 text-left">Variante</th>
-                  <th className="p-2 text-right">Respostas</th>
-                  <th className="p-2 text-right">Conclusões</th>
-                  <th className="p-2 text-right">Taxa</th>
+                  <th className="p-2 text-left">{T.v}</th>
+                  <th className="p-2 text-right">{T.r}</th>
+                  <th className="p-2 text-right">{T.c}</th>
+                  <th className="p-2 text-right">{T.tx}</th>
                 </tr>
               </thead>
               <tbody>

@@ -62,10 +62,17 @@ export default function EditorBlocos({ quiz, blocos, onRecarregar, onMudouPrevie
   };
 
   const handleReorder = async (novaLista) => {
+    const anterior = listaLocal;
     setListaLocal(novaLista);
     const novaOrdem = novaLista.map((b, i) => ({ id: b.id, ordem: i + 1 }));
-    await reordenarBlocos(novaOrdem);
-    onMudouPreview();
+    try {
+      await reordenarBlocos(novaOrdem);
+      await onRecarregar();
+      onMudouPreview();
+    } catch (err) {
+      setListaLocal(anterior);
+      alert('Não salvou a nova ordem: ' + (err.message || err));
+    }
   };
 
   const salvarConfig = async (id, config) => {
@@ -261,6 +268,9 @@ export default function EditorBlocos({ quiz, blocos, onRecarregar, onMudouPrevie
             {listaLocal.map((bloco, i) => {
               const info = INFO_TIPO[bloco.tipo] || { emoji: '❓', nome: bloco.tipo };
               const aberto = expandido === bloco.id;
+              const idxOferta = listaLocal.map(b => b.tipo).lastIndexOf('oferta');
+              const aposOferta = idxOferta >= 0 && i > idxOferta;
+              const inlineOferta = aposOferta && ['prova_social', 'conteudo', 'html', 'antes_depois'].includes(bloco.tipo);
               return (
                 <Reorder.Item key={bloco.id} value={bloco}>
                   {/* Zona de drop entre blocos */}
@@ -316,6 +326,16 @@ export default function EditorBlocos({ quiz, blocos, onRecarregar, onMudouPrevie
                               <div style={{ fontSize: 11, color: temProblema ? '#DC2626' : '#9CA3AF' }}>
                                 {resumo(bloco)}
                               </div>
+                              {inlineOferta && (
+                                <div style={{ fontSize: 11, color: '#059669', fontWeight: 600 }}>
+                                  ↳ aparece dentro da tela de oferta
+                                </div>
+                              )}
+                              {aposOferta && !inlineOferta && bloco.tipo !== 'oferta' && (
+                                <div style={{ fontSize: 11, color: '#DC2626' }}>
+                                  ⚠️ após a oferta: esta tela não é exibida
+                                </div>
+                              )}
                             </>
                           );
                         })()}

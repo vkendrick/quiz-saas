@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { getLead, atualizarLead, adicionarNota, adicionarHistorico } from '@/lib/crm';
+import Oculto from '@/components/prisma/Oculto';
 const STATUS = ['novo', 'contatado', 'qualificado', 'proposta', 'ganho', 'perdido'];
 
 export default function LeadDetalhe() {
@@ -38,7 +39,7 @@ export default function LeadDetalhe() {
       <div className="col-span-2 space-y-4">
         <div className="bg-white border rounded-lg p-5">
           <h1 className="text-xl font-bold mb-1">{l.nome || 'Sem nome'}</h1>
-          <p className="text-sm text-gray-500">{l.email}</p>
+          <p className="text-sm text-gray-500"><Oculto texto={l.email} /></p>
           <p className="text-sm text-gray-500">{l.telefone}</p>
           <div className="grid grid-cols-3 gap-3 mt-4 text-xs">
             <div><span className="text-gray-400">Score:</span> <b>{l.score}</b></div>

@@ -1,7 +1,7 @@
 'use client';
 import Botao from '../ui/Botao';
 
-export default function BlocoProvaSocial({ config, tema, avancar }) {
+export default function BlocoProvaSocial({ config, tema, avancar, semCta }) {
   const estrelas = '★'.repeat(Math.round(config.avaliacao || 5));
 
   return (
@@ -70,9 +70,11 @@ export default function BlocoProvaSocial({ config, tema, avancar }) {
         />
       )}
 
-      <Botao onClick={avancar} tema={tema}>
-        {config.cta || 'Continuar'}
-      </Botao>
+      {!semCta && (
+        <Botao onClick={avancar} tema={tema}>
+          {config.cta || 'Continuar'}
+        </Botao>
+      )}
     </div>
   );
 }

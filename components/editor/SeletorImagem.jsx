@@ -148,6 +148,9 @@ export default function SeletorImagem({ valor, onChange, pasta = 'quiz' }) {
           ({Math.round((1 - tamanhoComprimido / tamanhoOriginal) * 100)}% menor)
         </div>
       )}
+      <p style={{ fontSize: 11, color: '#9CA3AF', margin: '0 0 8px' }}>
+        Ideal: PNG sem fundo, 800px+. JPG cria quadrado branco no fundo verde.
+      </p>
 
       {url && (
         <div style={{ position: 'relative', display: 'inline-block' }}>

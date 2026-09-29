@@ -5,8 +5,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'sw
 const poppins = Poppins({ subsets: ['latin'], weight: ['400', '600', '700', '800'], variable: '--font-poppins', display: 'swap' });
 
 export const metadata = {
-  title: 'Quiz SaaS',
-  description: 'Sistema de quiz dinâmico de alta conversão'
+  title: 'Prisma · Venda e entrega no automático',
+  description: 'Prisma: quiz, checkout, área de membros e recuperação no automático'
 };
 
 export default function RootLayout({ children }) {
@@ -15,6 +15,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${poppins.variable}`}>
       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         {supabaseUrl && (
           <>
             <link rel="preconnect" href={supabaseUrl} />

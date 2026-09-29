@@ -1,4 +1,4 @@
-import QuizEngine from '@/components/quiz/QuizEngine';
+import QuizShell from './QuizShell';
 export default function QuizPage({ params }) {
-  return <QuizEngine slug={params.slug} />;
+  return <QuizShell slug={params.slug} />;
 }

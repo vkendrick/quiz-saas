@@ -3,17 +3,38 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
-import { uploadMedia } from '@/lib/quiz2';
+import { uploadMedia, criarPergunta, criarOpcao } from '@/lib/quiz2';
 export default function PerguntasPage() {
   const { id } = useParams();
   const [perguntas, setPerguntas] = useState([]);
   const [aberta, setAberta] = useState(null);
   const [mostrarInativas, setMostrarInativas] = useState(false);
+  const [criando, setCriando] = useState(false);
+
+  const novaPergunta = async () => {
+    const texto = prompt('Texto da nova pergunta:', 'Nova pergunta?');
+    if (!texto) return;
+    setCriando(true);
+    try {
+      const proxima = perguntas.length
+        ? Math.max(...perguntas.map(p => p.ordem || 0)) + 1
+        : 1;
+      const nova = await criarPergunta(id, proxima, texto, 'unica');
+      await criarOpcao(nova.id, 'Opção A', 1);
+      await criarOpcao(nova.id, 'Opção B', 2);
+      await carregar();
+      setAberta(nova.id);
+    } catch (e) {
+      alert('Erro ao criar: ' + e.message);
+    } finally {
+      setCriando(false);
+    }
+  };
 
   const carregar = async () => {
     const { data } = await supabase
       .from('perguntas')
-      .select('*, opcoes(*)')
+      .select('*, opcoes!opcoes_pergunta_id_fkey(*)')
       .eq('quiz_id', id)
       .order('ordem');
 
@@ -125,6 +146,18 @@ export default function PerguntasPage() {
           <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>
             ✏️ Perguntas e pontuação
           </h1>
+          <button
+            onClick={novaPergunta}
+            disabled={criando}
+            style={{
+              marginLeft: 'auto', padding: '8px 16px',
+              background: criando ? '#93C5FD' : '#3B82F6', color: '#FFF',
+              border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700,
+              cursor: criando ? 'wait' : 'pointer', whiteSpace: 'nowrap'
+            }}
+          >
+            {criando ? 'Criando…' : '+ Nova pergunta'}
+          </button>
         </div>
 
         {/* Toggle inativas */}
@@ -277,6 +310,34 @@ export default function PerguntasPage() {
                         </label>
                       </div>
                     ))}
+                  </div>
+
+                  {/* TESTE A/B DO TEXTO */}
+                  <div style={{ marginTop: 12, background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 8, padding: '10px 12px' }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: '#5B21B6', marginBottom: 4 }}>🧪 Teste A/B do texto</div>
+                    <div style={{ fontSize: 11, color: '#6D28D9', marginBottom: 8, lineHeight: 1.5 }}>
+                      A = texto atual. Adicione B para dividir os visitantes (~50/50). Resultado em Métricas → A/B test.
+                    </div>
+                    {(p.variantes || []).map((v, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ background: '#7C3AED', color: '#FFF', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 800 }}>{v.variante || String.fromCharCode(65 + i)}</span>
+                        <span style={{ flex: 1, fontSize: 12, color: '#374151' }}>{v.texto}</span>
+                        <button type="button" onClick={async () => {
+                          if (!confirm(`Excluir variação ${v.variante || ''}?`)) return;
+                          await salvarPergunta(p.id, { variantes: (p.variantes || []).filter((_, j) => j !== i) });
+                        }} style={{ background: 'transparent', border: '1px solid #FECACA', color: '#DC2626', borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>X</button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={async () => {
+                      const texto = prompt('Texto da variação ' + String.fromCharCode(65 + (p.variantes || []).length) + ':');
+                      if (!texto) return;
+                      const vs = [...(p.variantes || [])];
+                      if (!vs.length) vs.push({ texto: p.texto, variante: 'A' });
+                      vs.push({ texto, variante: String.fromCharCode(65 + vs.length) });
+                      await salvarPergunta(p.id, { variantes: vs });
+                    }} style={{ padding: '7px 12px', background: '#7C3AED', color: '#FFF', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                      + Adicionar variação
+                    </button>
                   </div>
 
                   {/* Ações da pergunta */}

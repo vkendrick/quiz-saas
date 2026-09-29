@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { getSessaoId } from '@/lib/tracking';
+import { escolherVariante } from '@/lib/quiz2';
 
 export default function BlocoPergunta({
   config = {},
@@ -11,12 +13,10 @@ export default function BlocoPergunta({
   voltar,
   indiceAtual = 0
 }) {
-  const [selecionada, setSelecionada] = useState(() => {
-    if (!pergunta) return null;
-    const anterior = respostas[pergunta.id];
-    if (pergunta.tipo === 'multipla') return anterior || [];
-    return anterior || null;
-  });
+  // Escolha única sempre começa "solta": se a mesma pergunta repetir no fluxo,
+  // a resposta anterior só marca visualmente — nunca trava o avanço.
+  const [selecionada, setSelecionada] = useState(() =>
+    pergunta?.tipo === 'multipla' ? (respostas[pergunta?.id] || []) : null);
   const [hoverId, setHoverId] = useState(null);
 
   if (!pergunta) return <BlocoAviso tipo="sem_pergunta" />;
@@ -62,15 +62,18 @@ export default function BlocoPergunta({
     });
   };
 
+  const anterior = !isMultipla && !selecionada ? respostas[pergunta.id] : null;
   const isSelecionada = (opcaoId) => {
     if (isMultipla) {
       return Array.isArray(selecionada) && selecionada.includes(opcaoId);
     }
-    return selecionada === opcaoId;
+    if (selecionada) return selecionada === opcaoId;
+    return anterior === opcaoId;
   };
 
   const qtdSelecionadas = isMultipla && Array.isArray(selecionada) ? selecionada.length : 0;
-  const textoPergunta = pergunta.variantes?.[0]?.texto || pergunta.texto;
+  // A/B: sorteio fixo por sessão (mesma sessão, mesmo texto).
+  const textoPergunta = escolherVariante(pergunta, getSessaoId()).texto || pergunta.texto;
 
   return (
     <div>

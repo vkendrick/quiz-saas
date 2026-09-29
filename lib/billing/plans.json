@@ -1,0 +1,29 @@
+{
+  "_nota": "Trocar stripe_price_id pelos reais (Stripe dashboard → Prices, recorrentes mensais). Nunca commitar chaves.",
+  "planos": [
+    {
+      "id": "free", "nome": "Free", "mensal": 0, "fee": 0,
+      "stripe_price_id": null,
+      "desc": "Publique e venda antes de pagar.",
+      "features": ["1 produto", "1 quiz ou página", "Até R$500 em vendas rastreadas", "Dashboard Resumo"]
+    },
+    {
+      "id": "starter", "nome": "Starter", "mensal": 67, "moeda": "BRL", "fee": 4.9,
+      "stripe_price_id": "price_REPLACE_ME",
+      "desc": "Para quem fez a primeira venda e quer escalar.",
+      "features": ["Produtos ilimitados", "Quiz + páginas + área de membros", "Gestão Meta Ads + automação (aprovar)", "4,9% por venda rastreada"]
+    },
+    {
+      "id": "pro", "nome": "Pro", "mensal": 197, "moeda": "BRL", "fee": 2.9,
+      "stripe_price_id": "price_REPLACE_ME",
+      "desc": "Para operações rodando todos os dias.",
+      "features": ["Tudo do Starter", "Automação em modo auto", "Multi-moeda + multi-BM", "2,9% por venda rastreada"]
+    },
+    {
+      "id": "scale", "nome": "Scale", "mensal": 397, "moeda": "BRL", "fee": 1.9,
+      "stripe_price_id": "price_REPLACE_ME",
+      "desc": "Para quem escala com volume.",
+      "features": ["Tudo do Pro", "Regras e limites maiores", "Suporte prioritário", "1,9% por venda rastreada"]
+    }
+  ]
+}

@@ -15,7 +15,6 @@ export default function BarraProgresso({ progresso = 0, tema = {} }) {
       overflow: 'hidden'
     }}>
       <motion.div
-        initial={{ width: 0 }}
         animate={{ width: `${pct}%` }}
         transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
         style={{

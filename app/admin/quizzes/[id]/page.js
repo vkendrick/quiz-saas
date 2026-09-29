@@ -21,6 +21,11 @@ export default function MenuQuiz() {
       href: `/admin/quizzes/${id}/editor`
     },
     {
+      titulo: '❓ Perguntas',
+      desc: 'Cadastro das perguntas: textos, opções, A/B e on/off',
+      href: `/admin/quizzes/${id}/perguntas`
+    },
+    {
       titulo: '🎭 Aparência',
       desc: 'Paleta de cores, fonte e dados do cliente',
       href: `/admin/quizzes/${id}/tema`

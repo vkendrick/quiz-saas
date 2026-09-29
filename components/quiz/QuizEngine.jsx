@@ -2,9 +2,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { getQuizCompleto } from '@/lib/quiz2';
+import { getQuizCompleto, escolherVariante } from '@/lib/quiz2';
 import { montarTema } from '@/lib/design/presets';
-import { track, salvarLead } from '@/lib/tracking';
+import { track, salvarLead, getSessaoId, setQuizVersao } from '@/lib/tracking';
+import { registrarAbAtribuicao } from '@/lib/quiz';
 import { dispararEvento } from '@/lib/pixels';
 import Pixels from '@/components/Pixels';
 
@@ -29,7 +30,12 @@ const RelatorioDiagnostico = dynamic(() => import('./blocos/RelatorioDiagnostico
 
 const cache = new Map();
 
-export default function QuizEngine({ slug }) {
+// Blocos estáticos que, posicionados após a oferta, aparecem NA MESMA TELA
+// (a oferta não tem botão de avançar — sem isso eles seriam inalcançáveis).
+const TIPOS_OFERTA_INLINE = ['prova_social', 'conteudo', 'html', 'antes_depois'];
+
+// paletaForcada: override opcional (ex: toggle claro/escuro do visitante).
+export default function QuizEngine({ slug, paletaForcada }) {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
   const [quiz, setQuiz] = useState(null);
@@ -76,6 +82,12 @@ export default function QuizEngine({ slug }) {
 
       setQuiz(q);
       setBlocos(b);
+      // Carimba a versão atual nos eventos (p/ comparar versões depois).
+      // Via RPC própria (fura RLS); fallback silencioso = sem carimbo.
+      try {
+        const { data: vv } = await supabase.rpc('quiz_versao_atual', { p_slug: slug });
+        setQuizVersao(typeof vv === 'number' ? vv : null);
+      } catch { setQuizVersao(null); }
 
       if (q.pular_intro) {
         const idx = b.findIndex(x => x.tipo !== 'intro');
@@ -101,7 +113,7 @@ export default function QuizEngine({ slug }) {
     if (!quiz) return {};
     return montarTema({
       preset_tema: quiz.preset_tema,
-      paleta_id: quiz.paleta_id,
+      paleta_id: paletaForcada || quiz.paleta_id,
       fonte_id: quiz.fonte_id,
       cor_cta: quiz.cor_cta,
       tema_overrides: quiz.tema_overrides || {},
@@ -110,7 +122,7 @@ export default function QuizEngine({ slug }) {
       rodape_texto: quiz.rodape_texto,
       rodape_html: quiz.rodape_html
     });
-  }, [quiz]);
+  }, [quiz, paletaForcada]);
 
   const blocoAtual = blocos[indiceAtual];
   const progresso = blocos.length > 0
@@ -263,13 +275,17 @@ export default function QuizEngine({ slug }) {
     setRespostas(novas);
 
     if (quiz?.id && !preview) {
+      // A/B: carimba a variante vista nesta sessão (mesmo sorteio da tela).
+      const pg = blocos.find(b => b.tipo === 'pergunta' && b.pergunta?.id === perguntaId)?.pergunta;
+      const vv = pg ? escolherVariante(pg, getSessaoId()) : { variante: null };
       if (Array.isArray(opcaoOuIds)) {
         opcaoOuIds.forEach(id => {
-          track(quiz.id, 'resposta', { pergunta_id: perguntaId, opcao_id: id });
+          track(quiz.id, 'resposta', { pergunta_id: perguntaId, opcao_id: id, variante: vv.variante });
         });
       } else {
-        track(quiz.id, 'resposta', { pergunta_id: perguntaId, opcao_id: opcaoOuIds });
+        track(quiz.id, 'resposta', { pergunta_id: perguntaId, opcao_id: opcaoOuIds, variante: vv.variante });
       }
+      if (vv.variante) registrarAbAtribuicao(quiz.id, getSessaoId(), perguntaId, vv.variante);
     }
 
     if (!Array.isArray(opcaoOuIds) && info?.proxima_pergunta) {
@@ -379,8 +395,44 @@ export default function QuizEngine({ slug }) {
       case 'antes_depois':
         return <BlocoAntesDepois {...props} />;
 
-      case 'oferta':
-        return <BlocoOferta {...props} leadId={leadId} />;
+      case 'oferta': {
+        // Consome blocos estáticos seguintes e exibe junto (evita telas mortas).
+        const extras = [];
+        let j = indiceAtual + 1;
+        while (j < blocos.length && TIPOS_OFERTA_INLINE.includes(blocos[j].tipo)) {
+          extras.push(blocos[j]);
+          j++;
+        }
+        const avancarPosOferta = () => {
+          setDirecao(1);
+          if (j < blocos.length) setIndiceAtual(j);
+        };
+        const renderExtra = (b) => {
+          const p = {
+            config: b.config || {}, tema, quiz,
+            avancar: avancarPosOferta, voltar,
+            indiceAtual, totalBlocos: blocos.length
+          };
+          switch (b.tipo) {
+            // Dentro da oferta: sem botões (só faz sentido fora dela).
+            case 'prova_social': return <BlocoProvaSocial key={b.id} {...p} semCta />;
+            case 'conteudo': return <BlocoConteudo key={b.id} {...p} />;
+            case 'html': return <BlocoHTML key={b.id} {...p} />;
+            case 'antes_depois': return <BlocoAntesDepois key={b.id} {...p} />;
+            default: return null;
+          }
+        };
+        return (
+          <>
+            <BlocoOferta {...props} leadId={leadId} />
+            {extras.length > 0 && (
+              <div style={{ marginTop: 20 }}>
+                {extras.map(renderExtra)}
+              </div>
+            )}
+          </>
+        );
+      }
 
       case 'relatorio_diagnostico':
         return <RelatorioDiagnostico {...props} />;
@@ -459,16 +511,15 @@ export default function QuizEngine({ slug }) {
 function TelaCarregando() {
   return (
     <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', background: '#F9FAFB'
+      minHeight: '60vh', display: 'flex', alignItems: 'center',
+      justifyContent: 'center',
     }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
         <div style={{
-          width: 40, height: 40, border: '4px solid #E5E7EB',
-          borderTopColor: '#111827', borderRadius: '50%',
+          width: 40, height: 40, border: '4px solid rgba(128,128,128,.25)',
+          borderTopColor: '#2EAA84', borderRadius: '50%',
           animation: 'spin 0.8s linear infinite'
         }} />
-        <span style={{ fontSize: 14, color: '#6B7280' }}>Carregando quiz...</span>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     </div>

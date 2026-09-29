@@ -1,0 +1,207 @@
+{
+  "tema": "unha",
+  "template": "vendas-classica",
+  "nicho": "saúde natural — unhas",
+  "produto": "Código da Unha — Protocolo Natural Completo",
+  "tokens": {
+    "cores": {
+      "verde": "#1a7a5e", "verde_escuro": "#0f5240", "verde_medio": "#2eaa84",
+      "verde_claro": "#e8f5f0", "texto": "#1a1a1a", "texto_suave": "#4a4a4a",
+      "borda": "#d0e8df", "fundo": "#f7faf9", "branco": "#ffffff",
+      "amarelo": "#f5a623", "amarelo_claro": "#fef9ee", "risco": "#c0392b",
+      "destaque_hero": "#7de8c2"
+    },
+    "fontes": { "titulos": "Georgia, serif", "corpo": "sans-serif" },
+    "background": {
+      "hero": "linear-gradient(160deg, #0f3d2e 0%, #1a7a5e 100%)",
+      "dor": "#1a1a1a", "problemas": "var(--fundo)", "preco": "var(--verde-escuro)"
+    }
+  },
+  "assets_pendentes": [
+    "mockup-livro (capa do PDF — há imagens Gemini candidatas em Downloads/unha/)",
+    "avatars depoimentos (3 — ou iniciais)",
+    "hero-bg (opcional; hoje é gradiente)"
+  ],
+  "entregaveis_pdf": [
+    "Downloads/unha/codigo_da_unha_PT.pdf",
+    "Downloads/unha/bonus1_calendario_PT.pdf",
+    "Downloads/unha/bonus2_guia_compras_PT.pdf",
+    "Downloads/unha/bonus3_ficha_evolucao_PT.pdf"
+  ],
+  "copy": {
+    "pt": {
+      "topo": "⏳ Oferta especial de lançamento — <span>apenas hoje</span>",
+      "hero": {
+        "eyebrow": "Protocolo natural para unhas saudáveis",
+        "h1": "Elimine o <em>fungo, a encravada e a fragilidade</em> da sua unha de vez",
+        "sub": "O guia completo com protocolos por tipo de problema — você abre, identifica seu caso e já começa hoje.",
+        "cta": "Quero o Código da Unha agora →",
+        "prova": "🔒 Acesso imediato · Pagamento seguro · Garantia de 7 dias"
+      },
+      "dor": {
+        "titulo": "Você reconhece alguma dessas situações?",
+        "itens": [
+          "<strong>Vergonha de usar sandálias</strong> ou ir à praia por causa da aparência das unhas",
+          "<strong>Você já tentou de tudo</strong> — esmalte antifúngico, vinagre, óleo de melaleuca — e o fungo voltou",
+          "<strong>A dor lateral da unha encravada</strong> que piora todo vez que você calça o sapato",
+          "<strong>Unhas que quebram, descascam</strong> e nunca crescem como deveriam",
+          "<strong>Medo de contaminar</strong> familiares ou agravar o problema sem tratamento adequado"
+        ]
+      },
+      "problemas": {
+        "titulo": "Um guia para cada problema — na mesma compra",
+        "sub": "Você não precisa saber exatamente o que tem. Abre o guia, olha as fotos, encontra seu caso e segue o protocolo.",
+        "cards": [
+          { "icone": "🦠", "titulo": "Onicomicose", "desc": "Fungo que amarela, engrossa e deforma a lâmina ungueal" },
+          { "icone": "😣", "titulo": "Unha encravada", "desc": "Crescimento lateral com dor e risco de infecção" },
+          { "icone": "🌿", "titulo": "Fragilidade", "desc": "Unhas quebradiças, descascando ou que não crescem" },
+          { "icone": "🩹", "titulo": "Trauma ungueal", "desc": "Hematoma ou lesão após pancada ou pressão excessiva" },
+          { "icone": "🔴", "titulo": "Mancha branca", "desc": "Leuconíquia — causa e protocolo de recuperação" },
+          { "icone": "🧱", "titulo": "Unha espessa", "desc": "Hiperqueratose — como amolecer e tratar em casa" }
+        ]
+      },
+      "produto": {
+        "titulo": "Tudo que você precisa para resolver — sem médico, sem farmácia cara",
+        "sub": "O Código da Unha é um guia visual completo: cada problema tem sua própria seção com fotos de diagnóstico, protocolo passo a passo e cronograma de recuperação.",
+        "checklist": [
+          "Diagnóstico visual por fotos — você identifica seu caso sozinha",
+          "Protocolos com óleos naturais acessíveis (melaleuca, lavanda, neem e mais)",
+          "Cronograma semanal de aplicação para cada tipo de problema",
+          "O que fazer e o que NUNCA fazer em cada situação",
+          "Quando realmente é hora de procurar um médico",
+          "Dicas de prevenção para não ter recaída"
+        ],
+        "livro": { "icone": "💚", "titulo": "Código da Unha", "sub": "Protocolo Natural Completo" }
+      },
+      "bonus": {
+        "titulo": "Bônus incluídos — sem custo extra",
+        "sub": "Ao adquirir o Código da Unha hoje, você recebe também:",
+        "itens": [
+          { "valor": "Bônus 1 · Valor: <span>R$27</span>", "nome": "Calendário de 30 dias", "desc": "Planilha de acompanhamento com horários e doses de aplicação para cada protocolo" },
+          { "valor": "Bônus 2 · Valor: <span>R$19</span>", "nome": "Guia de compras dos óleos", "desc": "Onde encontrar, quais marcas e como avaliar a qualidade dos óleos essenciais" },
+          { "valor": "Bônus 3 · Valor: <span>R$27</span>", "nome": "Ficha de evolução fotográfica", "desc": "Template para registrar o antes/depois e acompanhar a recuperação semana a semana" }
+        ]
+      },
+      "depoimentos": {
+        "titulo": "O que quem já usou está dizendo",
+        "deps": [
+          { "texto": "\"Há 3 anos tentando tirar o fungo. Com o protocolo do óleo de melaleuca que aprendi aqui, em 6 semanas minha unha voltou ao normal.\"", "nome": "Carla M.", "local": "São Paulo, SP" },
+          { "texto": "\"Sempre tive vergonha de usar chinelo. Agora uso à vontade. O guia é muito prático — você acha seu caso em dois minutos.\"", "nome": "Fernanda R.", "local": "Belo Horizonte, MG" },
+          { "texto": "\"Comprei achando que seria mais um produto inútil. Fiquei surpresa — tem foto de cada tipo de problema, você sabe exatamente o que tem.\"", "nome": "Renata L.", "local": "Porto Alegre, RS" }
+        ]
+      },
+      "preco": {
+        "de": "De R$97", "por": "R$37", "moeda": "BRL",
+        "label": "pagamento único · acesso imediato",
+        "inclui": [
+          "✅ Código da Unha — Guia completo (PDF)",
+          "✅ Bônus 1: Calendário de 30 dias",
+          "✅ Bônus 2: Guia de compras dos óleos",
+          "✅ Bônus 3: Ficha de evolução fotográfica",
+          "✅ Atualizações futuras inclusas"
+        ],
+        "cta": "Garantir minha cópia agora →",
+        "garantia": "🛡️ <strong>Garantia incondicional de 7 dias.</strong> Não gostou? Devolvemos 100% sem perguntas."
+      },
+      "faq": {
+        "titulo": "Perguntas frequentes",
+        "faqs": [
+          { "p": "Funciona para qualquer tipo de fungo?", "r": "Sim. O guia cobre os principais tipos de onicomicose — superficial, subungueal e total. Cada tipo tem seu protocolo específico com óleos indicados." },
+          { "p": "Preciso ter os óleos em casa antes de comprar?", "r": "Não. O Bônus 2 (Guia de compras) ensina exatamente quais óleos comprar, onde encontrar e o que avaliar na hora de escolher. Você pode começar com o que tiver disponível." },
+          { "p": "Em quanto tempo verei resultado?", "r": "Depende do problema. Fungos leves: 3 a 6 semanas. Fungos crônicos: 2 a 4 meses. Unhas encravadas: 3 a 6 semanas. O guia tem cronograma detalhado para cada caso." },
+          { "p": "É seguro usar óleos se eu tiver diabetes?", "r": "O guia tem uma seção específica sobre cuidados para pessoas com diabetes. Para casos com comprometimento vascular, sempre indicamos consultar um médico antes." },
+          { "p": "Como vou receber o material?", "r": "Imediatamente após o pagamento, você recebe o link de acesso no seu e-mail. O conteúdo fica disponível para sempre." }
+        ]
+      },
+      "rodape": "Código da Unha · Protocolo Natural Completo<br>Este produto não substitui diagnóstico ou tratamento médico. Consulte um profissional de saúde em casos graves.<br>© 2025 Todos os direitos reservados.",
+      "sticky": "Quero o Código da Unha — R$37 →"
+    },
+    "es": {
+      "topo": "⏳ Oferta especial de lanzamiento — <span>solo hoy</span>",
+      "hero": {
+        "eyebrow": "Protocolo natural para uñas sanas",
+        "h1": "Elimina <em>el hongo, la uña encarnada y la fragilidad</em> de tus uñas de una vez",
+        "sub": "La guía completa con protocolos por tipo de problema — la abres, identificas tu caso y empiezas hoy mismo.",
+        "cta": "Quiero el Código de la Uña ahora →",
+        "prova": "🔒 Acceso inmediato · Pago seguro · Garantía de 7 días"
+      },
+      "dor": {
+        "titulo": "¿Te identificas con alguna de estas situaciones?",
+        "itens": [
+          "<strong>Vergüenza de usar sandalias</strong> o ir a la playa por el aspecto de tus uñas",
+          "<strong>Ya lo has probado todo</strong> — esmalte antifúngico, vinagre, aceite de árbol de té — y el hongo volvió",
+          "<strong>El dolor lateral de la uña encarnada</strong> que empeora cada vez que te pones los zapatos",
+          "<strong>Uñas que se quiebran, se descaman</strong> y nunca crecen como deberían",
+          "<strong>Miedo de contagiar</strong> a familiares o agravar el problema sin tratamiento adecuado"
+        ]
+      },
+      "problemas": {
+        "titulo": "Una guía para cada problema — en la misma compra",
+        "sub": "No necesitas saber exactamente qué tienes. Abres la guía, miras las fotos, encuentras tu caso y sigues el protocolo.",
+        "cards": [
+          { "icone": "🦠", "titulo": "Onicomicosis", "desc": "Hongo que amarillea, engrosa y deforma la lámina ungueal" },
+          { "icone": "😣", "titulo": "Uña encarnada", "desc": "Crecimiento lateral con dolor y riesgo de infección" },
+          { "icone": "🌿", "titulo": "Fragilidad", "desc": "Uñas quebradizas, que se descaman o no crecen" },
+          { "icone": "🩹", "titulo": "Trauma ungueal", "desc": "Hematoma o lesión tras un golpe o presión excesiva" },
+          { "icone": "🔴", "titulo": "Mancha blanca", "desc": "Leuconiquia — causa y protocolo de recuperación" },
+          { "icone": "🧱", "titulo": "Uña engrosada", "desc": "Hiperqueratosis — cómo ablandar y tratar en casa" }
+        ]
+      },
+      "produto": {
+        "titulo": "Todo lo que necesitas para resolverlo — sin médico, sin farmacia cara",
+        "sub": "El Código de la Uña es una guía visual completa: cada problema tiene su propia sección con fotos de diagnóstico, protocolo paso a paso y cronograma de recuperación.",
+        "checklist": [
+          "Diagnóstico visual por fotos — identificas tu caso tú sola",
+          "Protocolos con aceites naturales accesibles (árbol de té, lavanda, neem y más)",
+          "Cronograma semanal de aplicación para cada tipo de problema",
+          "Qué hacer y qué NUNCA hacer en cada situación",
+          "Cuándo realmente necesitas ver a un médico",
+          "Consejos de prevención para evitar recaídas"
+        ],
+        "livro": { "icone": "💚", "titulo": "Código de la Uña", "sub": "Protocolo Natural Completo" }
+      },
+      "bonus": {
+        "titulo": "Bonos incluidos — sin costo extra",
+        "sub": "Al adquirir el Código de la Uña hoy, recibes también:",
+        "itens": [
+          { "valor": "Bono 1 · Valor: <span>$9 USD</span>", "nome": "Calendario de 30 días", "desc": "Planilla de seguimiento con horarios y dosis de aplicación para cada protocolo" },
+          { "valor": "Bono 2 · Valor: <span>$7 USD</span>", "nome": "Guía de compra de aceites", "desc": "Dónde encontrarlos, qué marcas elegir y cómo evaluar la calidad de los aceites esenciales" },
+          { "valor": "Bono 3 · Valor: <span>$9 USD</span>", "nome": "Ficha de evolución fotográfica", "desc": "Plantilla para registrar el antes/después y seguir la recuperación semana a semana" }
+        ]
+      },
+      "depoimentos": {
+        "titulo": "Lo que dicen quienes ya lo usaron",
+        "deps": [
+          { "texto": "\"3 años intentando eliminar el hongo. Con el protocolo de aceite de árbol de té que aprendí aquí, en 6 semanas mi uña volvió a la normalidad.\"", "nome": "Valentina M.", "local": "Ciudad de México" },
+          { "texto": "\"Siempre tuve vergüenza de usar sandalias. Ahora las uso sin problema. La guía es muy práctica — encuentras tu caso en dos minutos.\"", "nome": "Daniela R.", "local": "Bogotá, Colombia" },
+          { "texto": "\"La compré pensando que sería otro producto inútil. Me sorprendió — tiene fotos de cada tipo de problema, sabes exactamente qué tienes.\"", "nome": "Marcela L.", "local": "Buenos Aires, Argentina" }
+        ]
+      },
+      "preco": {
+        "de": "Precio regular: $29 USD", "por": "$9", "moeda": "USD",
+        "label": "pago único · acceso inmediato",
+        "inclui": [
+          "✅ Código de la Uña — Guía completa (PDF)",
+          "✅ Bono 1: Calendario de 30 días",
+          "✅ Bono 2: Guía de compra de aceites",
+          "✅ Bono 3: Ficha de evolución fotográfica",
+          "✅ Actualizaciones futuras incluidas"
+        ],
+        "cta": "Asegurar mi copia ahora →",
+        "garantia": "🛡️ <strong>Garantía incondicional de 7 días.</strong> ¿No te gustó? Te devolvemos el 100% sin preguntas."
+      },
+      "faq": {
+        "titulo": "Preguntas frecuentes",
+        "faqs": [
+          { "p": "¿Funciona para cualquier tipo de hongo?", "r": "Sí. La guía cubre los principales tipos de onicomicosis — superficial, subungueal y total. Cada tipo tiene su protocolo específico con los aceites indicados." },
+          { "p": "¿Necesito tener los aceites en casa antes de comprar?", "r": "No. El Bono 2 (Guía de compra) enseña exactamente qué aceites comprar, dónde encontrarlos y cómo evaluarlos. Puedes empezar con lo que tengas disponible." },
+          { "p": "¿En cuánto tiempo veré resultados?", "r": "Depende del problema. Hongos leves: 3 a 6 semanas. Hongos crónicos: 2 a 4 meses. Uñas encarnadas: 3 a 6 semanas. La guía tiene un cronograma detallado para cada caso." },
+          { "p": "¿Es seguro usar aceites si tengo diabetes?", "r": "La guía tiene una sección específica sobre cuidados para personas con diabetes. En casos con compromiso vascular, siempre recomendamos consultar a un médico antes." },
+          { "p": "¿Cómo recibiré el material?", "r": "Inmediatamente después del pago, recibes el enlace de acceso en tu correo electrónico. El contenido queda disponible para siempre." }
+        ]
+      },
+      "rodape": "Código de la Uña · Protocolo Natural Completo<br>Este producto no sustituye el diagnóstico o tratamiento médico. Consulta a un profesional de salud en casos graves.<br>© 2025 Todos los derechos reservados.",
+      "sticky": "Quiero el Código de la Uña — $9 →"
+    }
+  }
+}

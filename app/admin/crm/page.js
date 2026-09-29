@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { listarLeads, atualizarLead, exportarCsv } from '@/lib/crm';
+import Oculto from '@/components/prisma/Oculto';
 import { listarQuizzes } from '@/lib/quiz';
 
 const STATUS = [
@@ -19,15 +20,26 @@ export default function CrmPage() {
   const [quizId, setQuizId] = useState('');
   const [leads, setLeads] = useState([]);
   const [resumo, setResumo] = useState([]);
-  const [filtro, setFiltro] = useState({ status: '', busca: '' });
+  const [filtro, setFiltro] = useState({ status: '', busca: '', periodo: 'tudo' });
 
   useEffect(() => {
     listarQuizzes().then(qs => { setQuizzes(qs); if (qs[0]) setQuizId(qs[0].id); });
   }, []);
 
+  const noPeriodo = (l) => {
+    if (filtro.periodo === 'tudo') return true;
+    const t = new Date(l.criado_em).getTime();
+    if (filtro.periodo === 'hoje') {
+      const mn = new Date(); mn.setHours(0, 0, 0, 0);
+      return t >= mn.getTime();
+    }
+    const lim = { '2h': 2 * 3600e3, '24h': 24 * 3600e3, '7d': 7 * 86400e3, '30d': 30 * 86400e3 }[filtro.periodo];
+    return (Date.now() - t) < lim;
+  };
+
   const carregar = async () => {
     if (!quizId) return;
-    const todos = await listarLeads(quizId, { busca: filtro.busca });
+    const todos = (await listarLeads(quizId, { busca: filtro.busca })).filter(noPeriodo);
     const resumoLocal = STATUS.map(status => ({
       status,
       total: todos.filter(l => (l.status_pipeline || 'novo') === status).length,
@@ -43,7 +55,7 @@ export default function CrmPage() {
     );
   };
 
-  useEffect(() => { carregar(); /* eslint-disable-next-line */ }, [quizId, filtro.status, filtro.busca]);
+  useEffect(() => { carregar(); /* eslint-disable-next-line */ }, [quizId, filtro.status, filtro.busca, filtro.periodo]);
 
   const mudarStatus = async (leadId, status) => {
     await atualizarLead(leadId, { status_pipeline: status });
@@ -70,6 +82,11 @@ export default function CrmPage() {
         <input placeholder="Buscar por nome / email / telefone" value={filtro.busca}
           onChange={e => setFiltro({ ...filtro, busca: e.target.value })}
           className="border rounded-lg px-3 py-2 text-sm flex-1" />
+        <select value={filtro.periodo} onChange={e => setFiltro({ ...filtro, periodo: e.target.value })}
+          className="border rounded-lg px-3 py-2 text-sm">
+          {[['2h', 'Últimas 2h'], ['hoje', 'Hoje'], ['24h', 'Últimas 24h'], ['7d', '7 dias'], ['30d', '30 dias'], ['tudo', 'Tudo']].map(([v, l]) => (
+            <option key={v} value={v}>{l}</option>))}
+        </select>
       </div>
 
       <div className="grid grid-cols-6 gap-3 mb-6">
@@ -100,7 +117,7 @@ export default function CrmPage() {
               <tr key={l.id} className="border-t">
                 <td className="p-3 font-medium">{l.nome || '—'}</td>
                 <td className="p-3 text-gray-500 text-xs">
-                  {l.email && <div>{l.email}</div>}
+                  {l.email && <div><Oculto texto={l.email} /></div>}
                   {l.telefone && <div>{l.telefone}</div>}
                 </td>
                 <td className="p-3">{l.score}</td>

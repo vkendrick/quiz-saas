@@ -30,7 +30,7 @@ export default function FormBlocoConteudo({ config, onChange }) {
       </Campo>
       <Campo label="Texto (aceita **negrito**, ==destaque==, __atenção__)">
         <textarea value={config.texto || ''} onChange={e => set({ texto: e.target.value })} rows={4} style={textarea} />
-      </Campo>]
+      </Campo>
       <Campo label="Imagem">
         <SeletorImagem valor={config.imagem_url} onChange={v => set({ imagem_url: v })} pasta="conteudo" />
       </Campo>

@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
 import EditorBlocos from '@/components/editor/EditorBlocos';
+import VersoesQuiz from '@/components/editor/VersoesQuiz';
 import PreviewTempoReal from '@/components/editor/PreviewTempoReal';
 import GuiaTexto from '@/components/editor/GuiaTexto';
 export default function EditorQuizPage() {
@@ -37,16 +38,18 @@ export default function EditorQuizPage() {
       const ordenados = [...blocos].sort((a, b) => a.ordem - b.ordem);
       const novasOrdens = ordenados.map((b, i) => ({ id: b.id, ordem: i + 1 }));
 
-      // Salva cada um (paralelo)
-      await Promise.all(
+      // Salva cada um (paralelo) — checa erros (update não dá throw sozinho).
+      const resUpd = await Promise.all(
         novasOrdens.map(({ id: blocoId, ordem }) =>
           supabase.from('blocos').update({ ordem }).eq('id', blocoId)
         )
       );
+      const erroUpd = resUpd.find(r => r.error)?.error;
+      if (erroUpd) throw erroUpd;
 
       // 2. Marca o quiz como revisado
       const { data: user } = await supabase.auth.getUser();
-      await supabase
+      const { error: erroQuiz } = await supabase
         .from('quizzes')
         .update({
           revisado_em: new Date().toISOString(),
@@ -54,6 +57,7 @@ export default function EditorQuizPage() {
           publicado: true
         })
         .eq('id', quiz.id);
+      if (erroQuiz) throw erroQuiz;
 
       // 3. Recarrega pra refletir
       await carregar();
@@ -96,6 +100,16 @@ export default function EditorQuizPage() {
         )}
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+          <Link
+            href={`/admin/quizzes/${id}/perguntas`}
+            style={{
+              padding: '8px 14px', fontSize: 12, fontWeight: 700,
+              background: '#F5F3FF', color: '#5B21B6', border: '1px solid #DDD6FE',
+              borderRadius: 8, textDecoration: 'none', display: 'flex', alignItems: 'center'
+            }}
+          >
+            ❓ Perguntas
+          </Link>
           <button
             type="button"
             onClick={() => setPreviewAberto(!previewAberto)}
@@ -165,6 +179,7 @@ export default function EditorQuizPage() {
         alignItems: 'start'
       }}>
         <div style={{ minWidth: 0 }}>
+          <VersoesQuiz quizId={quiz.id} onRestaurou={carregar} />
           <EditorBlocos
             quiz={quiz}
             blocos={blocos}

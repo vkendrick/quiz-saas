@@ -1,0 +1,175 @@
+{
+  "tema": "manicure",
+  "template": "vendas-classica",
+  "nicho": "renda extra — curso de manicure",
+  "produto": "Renda Extra Manicure — do zero à profissional",
+  "tokens": {
+    "cores": {
+      "verde": "#C2447A", "verde_escuro": "#6E1E4A", "verde_medio": "#E0608F",
+      "verde_claro": "#FBE4EC", "texto": "#331B26", "texto_suave": "#8A6474",
+      "borda": "#F2D3DE", "fundo": "#FFF9F7", "branco": "#ffffff",
+      "amarelo": "#D9940D", "amarelo_claro": "#FDF3E0", "risco": "#c0392b",
+      "destaque": "#FFC53D", "escuro": "#2A1420"
+    },
+    "fontes": { "titulos": "Georgia, serif", "corpo": "sans-serif" },
+    "background": {
+      "hero": "linear-gradient(160deg, #2A1420 0%, #6E1E4A 55%, #C2447A 100%)",
+      "dor": "#2A1420", "problemas": "var(--fundo)", "preco": "var(--verde-escuro)"
+    }
+  },
+  "assets_pendentes": [
+    "foto autora (Camila) — upload via editor",
+    "fotos antes/depois de unhas (galeria + carrossel) — upload via editor",
+    "fotos depoimentos alunas — upload via editor",
+    "mini capa hero livro-oferta — upload via editor",
+    "VSL (YouTube/VTurb) — colar URL no bloco vsl"
+  ],
+  "copy": {
+    "pt": {
+      "topo": "🔥 Turma aberta — <span>70% OFF só até hoje</span>",
+      "hero": {
+        "eyebrow": "Curso 100% online · do zero ao profissional",
+        "h1": "Aprenda manicure e faça sua <em>primeira renda extra de R$1.500/mês</em> ainda este mês",
+        "sub": "Cutilagem perfeita, esmaltação impecável, unhas em gel + como captar suas primeiras clientes — mesmo começando do zero, mesmo sem salão.",
+        "cta": "Quero minha renda extra →",
+        "prova": "⭐ 4,9/5 · +8.400 alunas · Acesso imediato · Garantia de 7 dias"
+      },
+      "dor": {
+        "titulo": "O salário acaba antes do mês terminar?",
+        "itens": [
+          "<strong>As contas no cartão</strong> que você parcela todo mês sem ver saída",
+          "<strong>Depender de bico e hora extra</strong> para fechar as contas — e mesmo assim não sobra nada",
+          "<strong>Vontade de trabalhar para si mesma</strong>, com horários seus, sem patrão",
+          "<strong>Medo de começar do zero</strong> — 'será que eu consigo? será que tenho jeito?'",
+          "<strong>Já pensou em curso presencial caro</strong> que toma seu tempo e não ensina a conseguir clientes"
+        ]
+      },
+      "problemas": {
+        "titulo": "Feito para quem nunca pegou num alicate",
+        "sub": "Você não precisa de dom, experiência ou salão. Precisa de método — e de alguém que te mostre o caminho das clientes.",
+        "cards": [
+          { "icone": "🌱", "titulo": "Do zero absoluto", "desc": "Da primeira cutilagem à unha em gel, aula por aula, sem pular etapas" },
+          { "icone": "⏱️", "titulo": "Aulas de 15 minutos", "desc": "Feitas para quem trabalha fora ou cuida da casa — estude no seu ritmo" },
+          { "icone": "💅", "titulo": "Kit iniciante barato", "desc": "Lista enxuta de materiais: comece gastando menos de R$150" },
+          { "icone": "🤝", "titulo": "Captação de clientes", "desc": "Módulo completo: da primeira cliente do bairro à agenda cheia" },
+          { "icone": "📜", "titulo": "Certificado incluso", "desc": "Certificado de conclusão para exibir e passar confiança" },
+          { "icone": "♾️", "titulo": "Acesso vitalício", "desc": "Pague uma vez, assista para sempre — incluindo atualizações" }
+        ]
+      },
+      "produto": {
+        "titulo": "Tudo que você recebe no Renda Extra Manicure",
+        "sub": "Mais de 40 aulas diretas ao ponto: técnica + negócio. Porque unha bonita sem cliente não paga conta — e cliente sem técnica não volta.",
+        "checklist": [
+          "Cutilagem perfeita sem machucar (a técnica que as clientes mais elogiam)",
+          "Esmaltação impecável que dura 2x mais",
+          "Unhas em gel e fibra: aplicação, manutenção e remoção",
+          "Nail art simples que valoriza o serviço em até 40%",
+          "Biossegurança e esterilização: trabalhe com segurança",
+          "Precificação: quanto cobrar sem medo e sem prejuízo",
+          "Captação de clientes: Instagram + bairro + indicação",
+          "Certificado de conclusão + acesso vitalício"
+        ],
+        "livro": { "icone": "💅", "titulo": "Renda Extra Manicure", "sub": "Do zero à profissional" }
+      },
+      "bonus": {
+        "titulo": "Bônus para acelerar seus primeiros R$1.000",
+        "sub": "Entrando hoje, você leva também:",
+        "itens": [
+          { "valor": "Bônus 1 · Valor: <span>R$47</span>", "nome": "Lista de fornecedores baratos", "desc": "Onde comprar materiais bons e baratos, com links e faixa de preço" },
+          { "valor": "Bônus 2 · Valor: <span>R$37</span>", "nome": "Planilha de precificação", "desc": "Descubra seu preço ideal por serviço e nunca mais trabalhe no prejuízo" },
+          { "valor": "Bônus 3 · Valor: <span>R$37</span>", "nome": "Guia Instagram para manicures", "desc": "Como montar o perfil, que fotos postar e transformar seguidora em cliente" }
+        ]
+      },
+      "depoimentos": {
+        "titulo": "Alunas que já estão lucrando",
+        "deps": [
+          { "texto": "\"Fiz minha primeira cliente 12 dias depois de começar. No primeiro mês fechei R$1.380 — trabalhando no quarto de casa.\"", "nome": "Jéssica P.", "local": "Fortaleza, CE" },
+          { "texto": "\"Eu nunca tinha feito uma unha na vida. O módulo de captação me deu 6 clientes em 2 semanas só com o Instagram.\"", "nome": "Patrícia S.", "local": "Salvador, BA" },
+          { "texto": "\"Trabalhava como caixa e larguei. Hoje tenho agenda cheia de terça a sábado e ganho mais que o dobro.\"", "nome": "Aline C.", "local": "Curitiba, PR" },
+          { "texto": "\"O que mais me ajudou foi a precificação. Eu cobrava R$15 e achava caro — hoje cobro R$45 e as clientes pagam felizes.\"", "nome": "Mariana L.", "local": "Goiânia, GO" },
+          { "texto": "\"Com 3 meses de curso recuperei 10x o investimento. Minha sogra virou cliente e me indica para todo mundo.\"", "nome": "Vanessa R.", "local": "Recife, PE" },
+          { "texto": "\"As aulas são curtas e dá para estudar à noite depois do trabalho. Em 2 meses eu já atendia todo fim de semana.\"", "nome": "Camila T.", "local": "Manaus, AM" }
+        ]
+      },
+      "carrossel": {
+        "titulo": "Antes e depois das alunas",
+        "sub": "Arraste para o lado e veja a evolução",
+        "slides": [
+          { "src": "", "legenda": "\"Primeira cutilagem sozinha — tremi, mas saiu! Hoje faço em 40 min.\" — Jéssica P." },
+          { "src": "", "legenda": "\"Meu primeiro gel completo. A cliente chorou de alegria.\" — Patrícia S." },
+          { "src": "", "legenda": "\"Do kit de R$120 aos R$1.380 no primeiro mês.\" — Jéssica P." },
+          { "src": "", "legenda": "\"Agenda cheia de terça a sábado em 4 meses.\" — Aline C." },
+          { "src": "", "legenda": "\"Saí dos R$15 para R$45 por atendimento.\" — Mariana L." }
+        ]
+      },
+      "modulos": {
+        "titulo": "O que você vai dominar, módulo a módulo",
+        "sub": "6 módulos, 40+ aulas curtas e diretas",
+        "itens": [
+          { "titulo": "M1 · Base e cutilagem", "desc": "Preparação da unha, cutilagem sem machucar e acabamento limpo" },
+          { "titulo": "M2 · Esmaltação profissional", "desc": "Técnica de esmaltação duradoura, francesinha e cores escuras sem borrar" },
+          { "titulo": "M3 · Gel e fibra", "desc": "Aplicação, curvatura, manutenção e remoção segura" },
+          { "titulo": "M4 · Nail art que vende", "desc": "Decorações simples e rápidas que aumentam seu ticket em até 40%" },
+          { "titulo": "M5 · Precificação e finanças", "desc": "Quanto cobrar, controle de gastos e meta de R$1.500/mês" },
+          { "titulo": "M6 · Captação de clientes", "desc": "Instagram, bairro e indicação: da primeira cliente à agenda cheia" }
+        ]
+      },
+      "passos": {
+        "titulo": "Como funciona, em 3 passos",
+        "itens": [
+          { "titulo": "Assista às aulas", "desc": "Acesso imediato, no celular ou computador, 15 min por dia" },
+          { "titulo": "Pratique em casa", "desc": "Comece nas suas unhas, depois família e amigas" },
+          { "titulo": "Lucre com clientes", "desc": "Use o módulo de captação e faça seus primeiros R$1.000" }
+        ]
+      },
+      "para-quem": {
+        "titulo": "Para quem é o Renda Extra Manicure",
+        "sim": ["Quer uma renda extra trabalhando de casa", "Nunca fez unha mas tem vontade de aprender", "Já faz unha e quer profissionalizar e cobrar mais", "Quer horários flexíveis e ser sua própria chefe"],
+        "nao": ["Procura dinheiro sem esforço ou esquema milagroso", "Não quer praticar nem atender clientes", "Quer apenas fazer as próprias unhas (este curso é para lucrar)"],
+        "antes": ["Salário que não fecha o mês", "Dependência de bico e hora extra", "Medo de começar do zero"],
+        "depois": ["Renda extra de R$1.000 a R$3.000/mês", "Agenda própria, horários seus", "Profissão nas mãos para sempre"]
+      },
+      "autor": {
+        "nome": "Camila Duarte",
+        "bio": "Manicure há 12 anos, saí de uma cadeira no fundo de casa para uma esmalteria com 3 funcionárias. Já formei +8.400 alunas no método Renda Extra — do zero à primeira cliente pagante.",
+        "foto": "",
+        "numeros": [
+          { "valor": "+8.400", "label": "alunas formadas" },
+          { "valor": "12 anos", "label": "de profissão" },
+          { "valor": "4,9/5", "label": "avaliação média" }
+        ]
+      },
+      "garantia": {
+        "titulo": "Risco zero por 7 dias",
+        "texto": "Entre, assista às aulas, comece a praticar. Se achar que não é para você, devolvemos 100% do valor — sem perguntas, sem burocracia."
+      },
+      "preco": {
+        "de": "De R$297", "por": "R$47", "moeda": "BRL",
+        "label": "pagamento único · acesso vitalício",
+        "inclui": [
+          "✅ Curso completo Renda Extra Manicure (40+ aulas)",
+          "✅ Bônus 1: Lista de fornecedores baratos",
+          "✅ Bônus 2: Planilha de precificação",
+          "✅ Bônus 3: Guia Instagram para manicures",
+          "✅ Certificado de conclusão",
+          "✅ Acesso vitalício + atualizações"
+        ],
+        "cta": "Quero entrar agora →",
+        "garantia": "🛡️ <strong>Garantia incondicional de 7 dias.</strong> Não gostou? Devolvemos 100% sem perguntas."
+      },
+      "faq": {
+        "titulo": "Perguntas frequentes",
+        "faqs": [
+          { "p": "Nunca fiz unha na vida. Vou conseguir?", "r": "Sim — o curso foi desenhado para o zero absoluto. As aulas começam do básico (como segurar o alicate) e evoluem até gel e fibra. 70% das alunas nunca tinham feito unha antes." },
+          { "p": "Preciso de muito material para começar?", "r": "Não. O Bônus 1 traz a lista enxuta do kit iniciante — dá para começar gastando menos de R$150. Você compra mais material com o lucro das primeiras clientes." },
+          { "p": "Quanto tempo até fazer minha primeira renda?", "r": "A média das alunas é 2 a 4 semanas até a primeira cliente pagante, estudando ~15 min por dia e seguindo o módulo de captação." },
+          { "p": "Trabalho fora o dia todo. Consigo fazer?", "r": "Sim. As aulas têm ~15 min e ficam disponíveis para sempre. A maioria das alunas estuda à noite e atende aos fins de semana até conseguir viver da profissão." },
+          { "p": "O certificado vale alguma coisa?", "r": "Você recebe certificado de conclusão com carga horária, que ajuda a passar confiança para as clientes e pode ser usado como horas complementares em alguns cursos." },
+          { "p": "E se eu não gostar?", "r": "Você tem 7 dias de garantia incondicional. Basta pedir o reembolso e devolvemos 100% — sem perguntas." }
+        ]
+      },
+      "rodape": "Renda Extra Manicure · Do zero à profissional<br>Resultados variam conforme dedicação e prática. Este produto não garante ganhos.<br>© 2026 Todos os direitos reservados.",
+      "sticky": "Quero minha renda extra — R$47 →"
+    }
+  }
+}

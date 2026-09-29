@@ -21,6 +21,19 @@ export default function BlocoConteudo({ config, tema, avancar }) {
       )}
 
 
+      {config.texto && (
+        <TextoRico
+          texto={config.texto}
+          tema={tema}
+          style={{
+            fontSize: 16,
+            lineHeight: 1.6,
+            color: tema.texto,
+            marginBottom: 24
+          }}
+        />
+      )}
+
 {config.cards && config.cards.length > 0 && (
   <div style={{ display: 'grid', gap: 10, marginBottom: 24 }}>
     {config.cards.map((c, i) => (

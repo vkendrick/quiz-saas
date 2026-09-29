@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase-browser';
+import Oculto from '@/components/prisma/Oculto';
 import { listarQuizzes } from '@/lib/quiz2';
 
 const COLUNAS = [
@@ -15,6 +16,8 @@ const COLUNAS = [
 ];
 
 const PERIODOS = [
+  { id: '2h',   label: 'Últimas 2h' },
+  { id: 'hoje', label: 'Hoje' },
   { id: '24h',  label: 'Últimas 24h' },
   { id: '7d',   label: 'Últimos 7 dias' },
   { id: '30d',  label: 'Últimos 30 dias' },
@@ -80,7 +83,13 @@ export default function KanbanPage() {
   const filtrarPorPeriodo = (lead) => {
     if (periodo === 'tudo') return true;
     const agora = Date.now();
+    if (periodo === 'hoje') {
+      const meiaNoite = new Date();
+      meiaNoite.setHours(0, 0, 0, 0);
+      return new Date(lead.criado_em).getTime() >= meiaNoite.getTime();
+    }
     const limite = {
+      '2h': 2 * 60 * 60 * 1000,
       '24h': 24 * 60 * 60 * 1000,
       '7d': 7 * 24 * 60 * 60 * 1000,
       '30d': 30 * 24 * 60 * 60 * 1000,
@@ -281,7 +290,7 @@ export default function KanbanPage() {
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap'
                     }}>
-                      {lead.email || lead.telefone || '—'}
+                      {lead.email ? <Oculto texto={lead.email} /> : (lead.telefone || '—')}
                     </div>
 
                     {/* 🔽 Tags visuais */}
