@@ -95,11 +95,18 @@ export async function POST(request) {
       .select("instancia, token")
       .eq("tenant_id", t.id)
       .single();
+    if (!c?.instancia || !c?.token)
+      return j(
+        { error: "Sem provedor conectado — salve instância/token primeiro." },
+        400,
+      );
     const r = await enviarTexto({
-      instancia: c?.instancia,
-      token: c?.token,
+      instancia: c.instancia,
+      token: c.token,
       fone: b.fone,
-      texto: "Teste Prisma ✅ Se chegou, o WhatsApp está ligado.",
+      texto:
+        String(b.texto || "").slice(0, 4000) ||
+        "Teste Prisma ✅ Se chegou, o WhatsApp está ligado.",
     });
     if (!r.ok) return j({ error: r.error }, 400);
     return j({ ok: true, id: r.id });

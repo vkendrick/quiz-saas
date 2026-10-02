@@ -109,6 +109,154 @@ function pickUtm(body, s) {
   };
 }
 
+// FASE 1 WhatsApp — fila de recuperação (abandono/pendente) + marca compra.
+// Sem fone no membro: sem fila (não há para onde mandar). Idempotente.
+import { ETAPAS_ABANDONO, ETAPAS_PENDENTE, ETAPAS_RECUSA, cenarioAtivo } from "@/lib/wpp-fila";
+async function agendarRecuperacao(supabase, saleId, statusFinal, isTest) {
+  if (
+    isTest ||
+    !["abandoned", "pending", "late", "refused"].includes(statusFinal)
+  )
+    return;
+  try {
+    const { data: s } = await supabase
+      .from("sales")
+      .select("tenant_id, product_id, member_email")
+      .eq("id", saleId)
+      .single();
+    if (!s?.product_id || !s?.member_email) return;
+    // Cenário desligado pelo dono? Sem fila (opt-out por oferta).
+    const cen =
+      statusFinal === "abandoned"
+        ? "abandono"
+        : statusFinal === "refused"
+          ? "recusado"
+          : "pendente";
+    if (!(await cenarioAtivo(supabase, s.tenant_id, s.product_id, cen))) return;
+    const { data: mb } = await supabase
+      .from("members")
+      .select("phone, firstname")
+      .eq("tenant_id", s.tenant_id)
+      .eq("email", String(s.member_email).toLowerCase())
+      .single();
+    const fone = String(mb?.phone || "").replace(/\D/g, "");
+    if (!fone) return;
+    let conv = (
+      await supabase
+        .from("wpp_conversas")
+        .select("id, resultado")
+        .eq("tenant_id", s.tenant_id)
+        .eq("lead_fone", fone)
+        .eq("product_id", s.product_id)
+        .order("atualizado_em", { ascending: false })
+        .limit(1)
+        .single()
+    ).data;
+    if (conv && ["comprado", "optout"].includes(conv.resultado)) return;
+    if (!conv) {
+      const base = {
+        tenant_id: s.tenant_id,
+        product_id: s.product_id,
+        sale_id: saleId,
+        lead_fone: fone,
+        lead_nome: mb?.firstname || null,
+        status: "agente",
+      };
+      const comOrigem = {
+        ...base,
+        origem: "fila",
+        motivo:
+          statusFinal === "abandoned" ? "abandonado" : "pendente_pagamento",
+      };
+      let r = await supabase
+        .from("wpp_conversas")
+        .insert(comOrigem)
+        .select("id")
+        .single();
+      if (r.error && /motivo|origem/i.test(r.error.message || "")) {
+        r = await supabase
+          .from("wpp_conversas")
+          .insert(base)
+          .select("id")
+          .single();
+      }
+      conv = r.data;
+    }
+    if (!conv) return;
+    const etapas =
+      statusFinal === "abandoned"
+        ? ETAPAS_ABANDONO
+        : statusFinal === "refused" || statusFinal === "late"
+          ? ETAPAS_RECUSA
+          : ETAPAS_PENDENTE;
+    for (const [et, ms] of etapas) {
+      const ex = await supabase
+        .from("wpp_followups")
+        .select("id")
+        .eq("conversa_id", conv.id)
+        .eq("etapa", et)
+        .is("enviado_em", null)
+        .eq("cancelado", false)
+        .limit(1)
+        .single();
+      if (ex.data) continue;
+      await supabase.from("wpp_followups").insert({
+        tenant_id: s.tenant_id,
+        conversa_id: conv.id,
+        etapa: et,
+        agendado_para: new Date(Date.now() + ms).toISOString(),
+      });
+    }
+  } catch (e) {
+    console.error("[wpp-fila]", e.message);
+  }
+}
+async function marcarCompraWpp(supabase, saleId, isTest) {
+  if (isTest) return;
+  try {
+    const { data: s } = await supabase
+      .from("sales")
+      .select("tenant_id, product_id, member_email, valor_convertido")
+      .eq("id", saleId)
+      .single();
+    if (!s?.member_email) return;
+    const { data: mb } = await supabase
+      .from("members")
+      .select("phone")
+      .eq("tenant_id", s.tenant_id)
+      .eq("email", String(s.member_email).toLowerCase())
+      .single();
+    const fone = String(mb?.phone || "").replace(/\D/g, "");
+    if (!fone) return;
+    const { data: convs } = await supabase
+      .from("wpp_conversas")
+      .select("id, valor_recuperado")
+      .eq("tenant_id", s.tenant_id)
+      .eq("lead_fone", fone)
+      .eq("product_id", s.product_id)
+      .is("resultado", null);
+    for (const c of convs || []) {
+      await supabase
+        .from("wpp_conversas")
+        .update({
+          resultado: "comprado",
+          status: "fechada",
+          valor_recuperado:
+            Math.round(((+c.valor_recuperado || 0) + (+s.valor_convertido || 0)) * 100) / 100,
+          atualizado_em: new Date().toISOString(),
+        })
+        .eq("id", c.id);
+      await supabase
+        .from("wpp_followups")
+        .update({ cancelado: true })
+        .eq("conversa_id", c.id)
+        .is("enviado_em", null);
+    }
+  } catch (e) {
+    console.error("[wpp-compra]", e.message);
+  }
+}
+
 // Venda aprovada ⇒ lead "comprou" no quiz de origem (sck = slug do quiz).
 // Sem isso, quiz sem bloco de captura nunca mostra a compra nas métricas.
 async function vincularLeadComprou(supabase, adId, email, nome, isTest) {
@@ -585,7 +733,13 @@ export async function POST(request) {
             norm.nome,
             url.searchParams.get("test") === "1",
           );
-          await disparaCAPI(
+    const ehTeste = url.searchParams.get("test") === "1";
+    // Fila WhatsApp no upgrade: escopo do ramo é prev.id/rst (não saleId).
+    if (!ehTeste) {
+      if (rst === "approved") await marcarCompraWpp(supabase, prev.id, false);
+      else await agendarRecuperacao(supabase, prev.id, rst, false);
+    }
+    await disparaCAPI(
             supabase,
             prev.id,
             rst,
@@ -631,6 +785,12 @@ export async function POST(request) {
             .eq("member_id", mb.id)
             .eq("product_id", prev.product_id);
         }
+      }
+      // Fila WhatsApp também no upgrade (boleto/pix aprovado depois).
+      if (!url.searchParams.get("test")) {
+        if (rst === "approved") await marcarCompraWpp(supabase, prev.id, false);
+        else if (["abandoned", "pending", "late", "refused"].includes(rst))
+          await agendarRecuperacao(supabase, prev.id, rst, false);
       }
       return Response.json({ ok: true, sale_id: prev.id, updated: rst });
     }
@@ -775,8 +935,12 @@ export async function POST(request) {
       url.searchParams.get("test") === "1",
     );
   }
-  // Abandono avisa no painel (base do agente de recuperação).
-  if (saleId && statusFinal === "abandoned" && url.searchParams.get("test") !== "1") {
+  // Abandono/recusa avisa no painel (base do agente de recuperação).
+  if (
+    saleId &&
+    ["abandoned", "refused"].includes(statusFinal) &&
+    url.searchParams.get("test") !== "1"
+  ) {
     try {
       const { data: tn } = await supabase
         .from("sales")
@@ -786,11 +950,22 @@ export async function POST(request) {
       if (tn) {
         await supabase.from("notifications").insert({
           tenant_id: tn.tenant_id,
-          titulo: "Carrinho abandonado 🔔",
+          titulo:
+            statusFinal === "refused"
+              ? "Pagamento recusado ⚠️"
+              : "Carrinho abandonado 🔔",
           corpo: `${norm.email || ""} · ${product || ""}`,
         });
       }
     } catch {}
+  }
+  // Fila WhatsApp no insert (mesmo escopo do ramo upgrade: saleId/statusFinal).
+  {
+    const ehT = url.searchParams.get("test") === "1";
+    if (saleId && !ehT) {
+      if (statusFinal === "approved") await marcarCompraWpp(supabase, saleId, false);
+      else await agendarRecuperacao(supabase, saleId, statusFinal, false);
+    }
   }
     await disparaCAPI(
       supabase,
@@ -798,12 +973,12 @@ export async function POST(request) {
       statusFinal,
       url.searchParams.get("test") === "1",
     );
-    // Notificação no painel (venda aprovada, reembolso, chargeback).
+    // Notificação no painel (venda aprovada, pendente gerado, reembolso...).
     try {
       if (
         saleId &&
         !url.searchParams.get("test") &&
-        ["approved", "refunded", "chargeback"].includes(st)
+        ["approved", "pending", "refunded", "chargeback"].includes(st)
       ) {
         const { data: sn } = await supabase
           .from("sales")
@@ -813,6 +988,7 @@ export async function POST(request) {
         if (sn) {
           const mapa = {
             approved: "Venda aprovada! 🎉",
+            pending: "Pagamento gerado ⏳",
             refunded: "Reembolso ⚠️",
             chargeback: "Chargeback 🚨",
           };

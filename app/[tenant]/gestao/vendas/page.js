@@ -6,6 +6,7 @@ import Link from "next/link";
 import Volta from "@/components/Volta";
 import Oculto from "@/components/prisma/Oculto";
 import { fmtMoney } from "@/lib/moeda";
+import { checkoutFinal, ehPrincipal } from "@/lib/checkout";
 
 const CSS = `
 *{box-sizing:border-box;margin:0;padding:0}
@@ -107,9 +108,21 @@ export default function Vendas() {
     const prod = (prods || []).find(
       (x) => x.slug === v.products?.slug,
     );
-    const link = (prod?.checkout_links || []).find(
+    const raw = (prod?.checkout_links || []).find(
       (l) => l.active !== false && l.url,
     );
+    const link = raw
+      ? {
+          ...raw,
+          url: checkoutFinal({
+            url: raw.url,
+            coupon: raw.coupon,
+            avista: raw.coupon_avista,
+            plataforma: raw.plataforma,
+            principal: ehPrincipal(prod),
+          }),
+        }
+      : null;
     const fone = String(v.fone || '').replace(/\D/g, '');
     if (fone) {
       const texto = encodeURIComponent(
@@ -337,6 +350,7 @@ export default function Vendas() {
             <option value="">Todos os status</option>
             <option value="approved">Aprovada</option>
             <option value="pending">Pendente</option>
+            <option value="refused">Recusada</option>
             <option value="abandoned">Abandonada</option>
             <option value="refunded">Reembolsada</option>
             <option value="chargeback">Chargeback</option>

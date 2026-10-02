@@ -110,10 +110,12 @@ export default function Produtos() {
         ? p.checkout_links.map((l) => ({
             plataforma: l.plataforma,
             url: l.url,
+            coupon: l.coupon || "",
+            coupon_avista: !!l.coupon_avista,
             webhook_secret: "",
             tem_secret: !!l.tem_secret,
           }))
-        : [{ plataforma: "outro", url: "", webhook_secret: "" }],
+        : [{ plataforma: "outro", url: "", coupon: "", coupon_avista: false, webhook_secret: "" }],
     });
     // Conteudo/bonus agora moram na Area; clientes em Vendas.
     if (q.aba === "conteudo" || q.aba === "bonus") {
@@ -197,7 +199,7 @@ export default function Produtos() {
       const l = (edit.links || [])[i] || {};
       return !l.url || l.webhook_secret || l.tem_secret;
     });
-  const VAZIO_LINK = { plataforma: "outro", url: "", webhook_secret: "" };
+  const VAZIO_LINK = { plataforma: "outro", url: "", coupon: "", coupon_avista: false, webhook_secret: "" };
   const linkDe = (i) => (edit.links || [])[i] || {};
   const setLink = (i, campo, valor) => {
     setEdit((e) => {
@@ -358,6 +360,8 @@ export default function Produtos() {
                             ? p.checkout_links.map((l) => ({
                                 plataforma: l.plataforma,
                                 url: l.url,
+                                coupon: l.coupon || "",
+                                coupon_avista: !!l.coupon_avista,
                                 webhook_secret: "",
                                 tem_secret: !!l.tem_secret,
                               }))
@@ -365,6 +369,8 @@ export default function Produtos() {
                                 {
                                   plataforma: "outro",
                                   url: "",
+                                  coupon: "",
+                                  coupon_avista: false,
                                   webhook_secret: "",
                                 },
                               ],
@@ -512,15 +518,21 @@ export default function Produtos() {
                 {" "}
                 <table>
                   <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Moeda</th>
-                      <th>Valor</th>
-                      <th>Plataforma</th>
-                      <th>Link do checkout</th>
-                      <th>Status</th>
-                      <th></th>
-                    </tr>
+                      <tr>
+                        <th>#</th>
+                        <th>Moeda</th>
+                        <th>Valor</th>
+                        <th>Plataforma</th>
+                        <th>Link do checkout</th>
+                        <th title="Só produto principal + Kiwify (?coupon=). Hotmart/outras: formato a confirmar.">
+                          Cupom
+                        </th>
+                        <th title="Força à vista (?split=1, sem parcelado). Variável por link.">
+                          À vista
+                        </th>
+                        <th>Status</th>
+                        <th></th>
+                      </tr>
                   </thead>
                   <tbody>
                     {Array.from({
@@ -593,6 +605,25 @@ export default function Produtos() {
                                 setLink(i, "url", e.target.value)
                               }
                               placeholder="https://..."
+                            />
+                          </td>
+                          <td style={{ minWidth: 110 }}>
+                            <input
+                              value={l.coupon || ""}
+                              onChange={(e) =>
+                                setLink(i, "coupon", e.target.value)
+                              }
+                              placeholder="UNHA50"
+                            />
+                          </td>
+                          <td style={{ textAlign: "center" }}>
+                            <input
+                              type="checkbox"
+                              checked={!!l.coupon_avista}
+                              onChange={(e) =>
+                                setLink(i, "coupon_avista", e.target.checked)
+                              }
+                              title="À vista (?split=1)"
                             />
                           </td>
                           <td>

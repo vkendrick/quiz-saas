@@ -20,9 +20,20 @@ export async function GET(request) {
   if (op.suspenso) return Response.json({ error: 'Assinatura suspensa — regularize para continuar.', suspenso: true }, { status: 403 });
   const supabase = svc();
   const tid = await tenantId(supabase, tenant);
-  const { data: products } = await supabase.from('products')
-    .select('*, product_prices(currency, amount), checkout_links(id, plataforma, url, active)')
-    .eq('tenant_id', tid).order('criado_em');
+  let products = [];
+  {
+    const r1 = await supabase.from('products')
+      .select('*, product_prices(currency, amount), checkout_links(id, plataforma, url, active, coupon, coupon_avista)')
+      .eq('tenant_id', tid).order('criado_em');
+    if (!r1.error) products = r1.data || [];
+    else {
+      // Sem 047/048: rele sem cupom.
+      const r2 = await supabase.from('products')
+        .select('*, product_prices(currency, amount), checkout_links(id, plataforma, url, active)')
+        .eq('tenant_id', tid).order('criado_em');
+      products = r2.data || [];
+    }
+  }
   const { data: comSecret } = await supabase.from('checkout_links').select('id')
     .not('webhook_secret', 'is', null).neq('webhook_secret', '');
   const temSecret = new Set((comSecret || []).map(x => x.id));
@@ -123,7 +134,16 @@ export async function POST(request) {
       const mesmo = (linksAtuais || []).find(a => (a.plataforma || 'outro') === (l.plataforma || 'outro') && a.url === l.url);
       if (mesmo?.webhook_secret) sec = mesmo.webhook_secret;
     }
-    await supabase.from('checkout_links').insert({ product_id: saved.id, plataforma: l.plataforma || 'outro', url: l.url, webhook_secret: sec, active: l.active !== false });
+    const ins = { product_id: saved.id, plataforma: l.plataforma || 'outro', url: l.url, webhook_secret: sec, active: l.active !== false };
+    if (l.coupon !== undefined) ins.coupon = String(l.coupon || '').trim() || null;
+    if (l.coupon_avista !== undefined) ins.coupon_avista = !!l.coupon_avista;
+    let r = await supabase.from('checkout_links').insert(ins);
+    if (r.error && /coupon/i.test(r.error.message || '')) {
+      delete ins.coupon;
+      delete ins.coupon_avista;
+      r = await supabase.from('checkout_links').insert(ins);
+    }
+    if (r.error) return Response.json({ error: r.error.message }, { status: 400 });
   }
   // funil por slugs (order bumps, upsells, downsells)
   const [bumps, ups, downs] = await Promise.all([

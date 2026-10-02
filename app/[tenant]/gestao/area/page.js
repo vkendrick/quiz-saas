@@ -667,6 +667,7 @@ function MembrosOferta({ tenant, oferta }) {
   const [de, setDe] = useState("");
   const [ate, setAte] = useState("");
   const [plat, setPlat] = useState("");
+  const [erroM, setErroM] = useState(null);
 
   useEffect(() => {
     setRows(null);
@@ -714,6 +715,7 @@ function MembrosOferta({ tenant, oferta }) {
   return (
     <div className="card">
       <h3>Membros · <Oculto texto={oferta.name?.pt || oferta.slug} /></h3>
+      {erroM && <p style={{ color: "#E05D5D", fontSize: 13 }}>{erroM}</p>}
       <div className="row" style={{ marginTop: 0 }}>
         <div>
           <label style={{ marginTop: 0 }}>De</label>
@@ -780,7 +782,39 @@ function MembrosOferta({ tenant, oferta }) {
                         : ""
                     }
                   >
-                    {m.ultimo_acesso ? tempoRel(m.ultimo_acesso) : "nunca"}
+                    {m.ultimo_acesso ? (
+                      tempoRel(m.ultimo_acesso)
+                    ) : (
+                      <button
+                        className="btn ghost sm"
+                        title="Confirmar que o acesso foi enviado / aluno entrou (manual)"
+                        onClick={async () => {
+                          setErroM(null);
+                          const r = await fetch("/api/prisma/admin/members", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              tenant,
+                              action: "marcar-entrou",
+                              member_id: m.id,
+                            }),
+                          })
+                            .then((r) => r.json())
+                            .catch(() => ({}));
+                          if (r.ok)
+                            setRows((rs) =>
+                              (rs || []).map((x) =>
+                                x.id === m.id
+                                  ? { ...x, ultimo_acesso: new Date().toISOString() }
+                                  : x,
+                              ),
+                            );
+                          else setErroM(r.error || "Falha");
+                        }}
+                      >
+                        Acesso enviado
+                      </button>
+                    )}
                   </td>
                   <td>{m.via || <span className="mut">—</span>}</td>
                   <td className="mut">{m.valor || "—"}</td>

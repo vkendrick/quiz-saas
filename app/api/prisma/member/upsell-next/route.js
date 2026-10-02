@@ -3,6 +3,7 @@
 // ainda NÃO tem): {offers:[{slug, name, price, moeda, checkout_url}]}.
 // Pública (sale UUID imprevisível); só mostra, nunca libera nada.
 import { createClient } from '@supabase/supabase-js';
+import { checkoutFinal, ehPrincipal } from '@/lib/checkout';
 
 export async function GET(request) {
   const sale = new URL(request.url).searchParams.get('sale');
@@ -23,15 +24,26 @@ export async function GET(request) {
 
   const ids = (s.products.upsells || []).filter(id => !tenho.has(id)).slice(0, 3);
   if (!ids.length) return Response.json({ offers: [] });
-  const { data: prods } = await supabase.from('products')
-    .select('id, slug, name, product_prices(currency, amount), checkout_links(url, active)')
-    .in('id', ids).eq('active', true);
+  let prods = [];
+  {
+    const r1 = await supabase.from('products')
+      .select('id, slug, name, type, product_prices(currency, amount), checkout_links(url, active, coupon, coupon_avista, plataforma)')
+      .in('id', ids).eq('active', true);
+    if (!r1.error) prods = r1.data || [];
+    else {
+      const r2 = await supabase.from('products')
+        .select('id, slug, name, type, product_prices(currency, amount), checkout_links(url, active)')
+        .in('id', ids).eq('active', true);
+      prods = r2.data || [];
+    }
+  }
   const offers = (prods || []).map(p => {
     const prices = p.product_prices || [];
     const brl = prices.find(x => x.currency === 'BRL') || prices[0];
     const link = (p.checkout_links || []).find(l => l.active);
     return { slug: p.slug, name: p.name, price: brl?.amount ?? null,
-      moeda: brl?.currency || 'BRL', checkout_url: link?.url || null };
+      moeda: brl?.currency || 'BRL',
+      checkout_url: link?.url ? checkoutFinal({ url: link.url, coupon: link.coupon, avista: link.coupon_avista, plataforma: link.plataforma, principal: ehPrincipal(p) }) : null };
   });
   return Response.json({ offers });
 }

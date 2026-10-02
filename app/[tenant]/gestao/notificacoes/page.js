@@ -114,9 +114,11 @@ export default function Notificacoes() {
           <h1>🔔 Notificações {naoLidas > 0 && `(${naoLidas})`}</h1>
         </div>
         <p className="sub">Vendas, reembolsos e avisos do seu painel.</p>
-        {push === 'inativo' && <button className="btn" onClick={ativarPush} style={{ marginBottom: 14 }}>Ativar push neste aparelho</button>}
-        {push === 'ativo' && <p className="sub">✅ Push ativo neste aparelho.</p>}
-        {naoLidas > 0 && <button className="btn" onClick={lerTodas}>Marcar todas como lidas</button>}
+        <div className="row" style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
+          {push === 'inativo' && <button className="btn" onClick={ativarPush}>Ativar push neste aparelho</button>}
+          {push === 'ativo' && <p className="sub" style={{ margin: 0 }}>✅ Push ativo neste aparelho.</p>}
+          {naoLidas > 0 && <button className="btn" onClick={lerTodas}>Marcar todas como lidas</button>}
+        </div>
         <div style={{ display: 'flex', gap: 8, margin: '14px 0', flexWrap: 'wrap' }}>
           {[['hoje', 'Hoje'], ['ontem', 'Ontem'], ['7d', '7 dias']].map(([k, l]) => (
             <button key={k} onClick={() => setFiltro(k)}

@@ -1,9 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase-browser';
-import { janelaDoPeriodo } from '@/lib/metricas';
 
-// Referência de mercado p/ quiz (conversão etapa/etapa anterior).
+// Funil fluxo em SVG (curvas suaves): recebe o resumo já calculado.
+// CÁLCULO ÚNICO na lib/metricas — sem query própria, sem drift.
 const IDEAL = {
   pt: [
     { etapa: 'Chegou', ref: 100 },
@@ -19,91 +17,148 @@ const IDEAL = {
   ],
 };
 const VER = {
-  pt: { acima: 'acima', media: 'na média', abaixo: 'abaixo' },
-  es: { acima: 'arriba', media: 'en la media', abaixo: 'abajo' },
+  pt: { acima: 'acima', abaixo: 'abaixo' },
+  es: { acima: 'arriba', abaixo: 'abajo' },
 };
 
 function veredito(pct, ref, lang) {
   const v = VER[lang] || VER.pt;
   if (pct == null) return null;
   if (pct >= ref) return { txt: v.acima, cor: '#10B981' };
-  if (pct >= ref * 0.7) return { txt: v.media, cor: '#F59E0B' };
   return { txt: v.abaixo, cor: '#EF4444' };
 }
 
-export default function FunilIdeal({ quizId, periodo, resumo, lang = 'pt' }) {
-  const [extra, setExtra] = useState(null);
-  // Se o resumo já traz cliques/comprou (janela exata), usa direto — sem drift.
-  const direto = resumo && resumo.cliques != null && resumo.comprou != null;
+const W = 600;
+const H = 190;
+const TOPO = 52;
+const CENTRO = 128;
+const ALT = 62;
 
-  useEffect(() => {
-    if (direto) { setExtra({ cliques: Number(resumo.cliques) || 0, comprou: Number(resumo.comprou) || 0 }); return; }
-    let cancelado = false;
-    (async () => {
-      try {
-        const { de: desde, ate } = janelaDoPeriodo(periodo);
-        const noAte = (q, col) => (ate ? q.lt(col, ate) : q);
-        const [{ count: cliques }, { data: comp }] = await Promise.all([
-          noAte(supabase.from('eventos').select('id', { count: 'exact', head: true })
-            .eq('quiz_id', quizId).eq('tipo', 'cta_clique').gte('criado_em', desde), 'criado_em'),
-          noAte(supabase.from('leads').select('id')
-            .eq('quiz_id', quizId).eq('status_pipeline', 'comprou').gte('comprou_em', desde), 'comprou_em'),
-        ]);
-        if (!cancelado) setExtra({ cliques: cliques || 0, comprou: (comp || []).length });
-      } catch { if (!cancelado) setExtra({ cliques: 0, comprou: 0 }); }
-    })();
-    return () => { cancelado = true; };
-  }, [quizId, periodo, direto]);
-
+export default function FunilIdeal({ resumo, lang = 'pt' }) {
   const chegou = Number(resumo?.visualizacoes ?? resumo?.inicios ?? 0) || 0;
   const concluiu = Number(resumo?.conclusoes ?? 0) || 0;
-  const clicou = Number(extra?.cliques ?? 0) || 0;
-  const comprou = Number(extra?.comprou ?? 0) || 0;
-  if (!chegou && extra === null) return null;
+  const clicou = Number(resumo?.cliques ?? 0) || 0;
+  const comprou = Number(resumo?.comprou ?? 0) || 0;
+  if (!chegou) return null;
 
   const vals = [chegou, concluiu, clicou, comprou];
   const max = Math.max(1, ...vals);
-  const pctPrev = vals.map((v, i) => (i === 0 ? 100 : vals[i - 1] > 0 ? Math.round((100 * v) / vals[i - 1]) : 0));
+  const pctPrev = vals.map((v, i) =>
+    i === 0 ? 100 : vals[i - 1] > 0 ? Math.round((100 * v) / vals[i - 1]) : 0,
+  );
+  const etapas = IDEAL[lang] || IDEAL.pt;
+  const n = vals.length;
+  const seg = W / n;
+  // Meia-altura por etapa (mínimo p/ etapa zerada continuar visível).
+  const meia = vals.map((v) =>
+    v <= 0 ? 4 : Math.max(10, Math.round((ALT * v) / max)),
+  );
+  const cx = (i) => Math.round(i * seg + seg / 2);
+  // Curva suave topo: de (x0,t0) a (x1,t1) com tangentes horizontais.
+  const curva = (x0, t0, x1, t1) =>
+    `C ${Math.round(x0 + seg / 2)} ${t0}, ${Math.round(x1 - seg / 2)} ${t1}, ${x1} ${t1}`;
+  let topo = `M 0 ${CENTRO - meia[0]}`;
+  for (let i = 0; i < n - 1; i++) {
+    const xa = Math.round((i + 1) * seg);
+    topo += ` L ${xa} ${CENTRO - meia[i]}`;
+    topo += ` ${curva(xa, CENTRO - meia[i], xa + seg, CENTRO - meia[i + 1])}`;
+  }
+  topo += ` L ${W} ${CENTRO - meia[n - 1]}`;
+  let base = ` L ${W} ${CENTRO + meia[n - 1]}`;
+  for (let i = n - 1; i > 0; i--) {
+    const xa = Math.round((i + 1) * seg);
+    const xb = Math.round(i * seg);
+    base += ` L ${xa} ${CENTRO + meia[i]}`;
+    base += ` ${curva(xa, CENTRO + meia[i], xb, CENTRO + meia[i - 1])}`;
+  }
+  base += ` L 0 ${CENTRO + meia[0]} Z`;
+  const d = topo + base;
 
   return (
     <section style={{ background: '#FFF', border: '1px solid #E5E7EB', borderRadius: 12, padding: 16, marginBottom: 16 }}>
       <h3 style={{ fontSize: 14, fontWeight: 700, textAlign: 'center', marginBottom: 2 }}>{lang === 'es' ? 'Embudo × ideal' : 'Funil × ideal'}</h3>
-      <p style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'center', marginBottom: 12 }}>{lang === 'es' ? '% de la etapa anterior · referencia de mercado' : '% da etapa anterior · referência de mercado'}</p>
-      <div style={{ maxWidth: 560, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {(IDEAL[lang] || IDEAL.pt).map((s, i) => {
-          const v = vals[i];
-          const pct = pctPrev[i];
-          const vd = i === 0 ? null : veredito(pct, s.ref, lang);
+      <p style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'center', marginBottom: 8 }}>{lang === 'es' ? '% de la etapa anterior · referencia de mercado' : '% da etapa anterior · referência de mercado'}</p>
+      <svg viewBox={`0 0 ${W} ${H + 34}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+        <defs>
+          <linearGradient id="fluxo" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#BFDBFE" />
+            <stop offset="55%" stopColor="#60A5FA" />
+            <stop offset="100%" stopColor="#2563EB" />
+          </linearGradient>
+        </defs>
+        {etapas.map((s, i) => (
+          <line
+            key={`g${i}`}
+            x1={Math.round(i * seg)}
+            y1={TOPO - 6}
+            x2={Math.round(i * seg)}
+            y2={H}
+            stroke="#E5E7EB"
+            strokeWidth="1"
+          />
+        ))}
+        <path d={d} fill="url(#fluxo)" opacity="0.9" />
+        {etapas.map((s, i) => (
+          <text
+            key={`t${i}`}
+            x={cx(i)}
+            y={CENTRO - meia[i] - 22}
+            textAnchor="middle"
+            fontSize="11"
+            fill="#6B7280"
+          >
+            {s.etapa.toUpperCase()}
+          </text>
+        ))}
+        {vals.map((v, i) => (
+          <text
+            key={`v${i}`}
+            x={cx(i)}
+            y={CENTRO - meia[i] - 8}
+            textAnchor="middle"
+            fontSize="15"
+            fontWeight="800"
+            fill="#111827"
+          >
+            {v}
+          </text>
+        ))}
+        {pctPrev.map(
+          (p, i) =>
+            i > 0 && (
+              <text
+                key={`p${i}`}
+                x={Math.round(i * seg)}
+                y={CENTRO + ALT + 12}
+                textAnchor="middle"
+                fontSize="12"
+                fontWeight="700"
+                fill={p >= etapas[i].ref ? '#10B981' : '#6B7280'}
+              >
+                {p}%
+              </text>
+            ),
+        )}
+        {etapas.map((s, i) => {
+          if (i === 0) return null;
+          const vd = veredito(pctPrev[i], s.ref, lang);
           return (
-            <div key={s.etapa}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 12, marginBottom: 3 }}>
-                <b style={{ width: 74 }}>{s.etapa}</b>
-                <span style={{ fontWeight: 700 }}>{v}</span>
-                {i > 0 && <span style={{ color: '#6B7280' }}>{pct}%</span>}
-                <span style={{ marginLeft: 'auto', color: '#9CA3AF', fontSize: 11 }}>ideal {i === 0 ? '—' : `${s.ref}%`}</span>
-                {vd && <span style={{ fontSize: 11, fontWeight: 700, color: vd.cor }}>{vd.txt}</span>}
-              </div>
-              <div style={{ height: 26, display: 'flex', justifyContent: 'center' }}>
-                <div style={{
-                  width: `${Math.max(8, Math.round((100 * Math.max(v, 1)) / max))}%`,
-                  minWidth: 60, background: vd && vd.cor === '#EF4444' ? '#FCA5A5' : '#3B82F6',
-                  borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#fff', fontSize: 11, fontWeight: 700,
-                }}>
-                  {i > 0 ? `${pct}%` : `${v}`}
-                </div>
-              </div>
-            </div>
+            <text
+              key={`r${i}`}
+              x={cx(i)}
+              y={H + 26}
+              textAnchor="middle"
+              fontSize="10"
+              fill="#9CA3AF"
+            >
+              {`ideal ${s.ref}% · `}
+              <tspan fill={vd.cor} fontWeight="700">
+                {vd.txt}
+              </tspan>
+            </text>
           );
         })}
-      </div>
+      </svg>
     </section>
   );
-}
-
-function parsePeriodo(p) {
-  const m = String(p || '').match(/^(\d+)\s*(hour|day)/);
-  if (!m) return 7 * 86400e3;
-  const n = parseInt(m[1], 10);
-  return m[2].startsWith('hour') ? n * 3600e3 : n * 86400e3;
 }

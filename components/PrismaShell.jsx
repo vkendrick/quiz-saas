@@ -91,6 +91,7 @@ export default function PrismaShell({ tenant, tenants, email, onTrocar, onSair, 
       t ? ['📊 Resumo', `/${t}/gestao`] : null,
       t ? ['💰 Vendas', `/${t}/gestao/vendas`] : null,
       t ? ['📣 Campanhas', `/${t}/gestao/campanhas`] : null,
+      t ? ['💬 Conversas', `/${t}/gestao/conversas`] : null,
       t ? [`🔔 Notificações${naoLidas ? ` (${naoLidas})` : ''}`, `/${t}/gestao/notificacoes`] : null,
     ].filter(Boolean)],
     ['Setups', [

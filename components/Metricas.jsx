@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { getMetricas, getMetricasJanela, janelaOntem, janelaAnteontem, janelaDoPeriodo, PERIODOS, intervaloDoRotulo } from '@/lib/metricas';
+import { getMetricas, getMetricasJanela, janelaOntem, janelaAnteontem, janelaDoPeriodo, completarResumo, PERIODOS, intervaloDoRotulo } from '@/lib/metricas';
 import { supabase } from '@/lib/supabase-browser';
 import FunilIdeal from './FunilIdeal';
 
@@ -30,32 +30,58 @@ export default function Metricas({ quizId, periodo: periodoExt, onPeriodo, lang 
   const [carregando, setCarregando] = useState(true);
 
   const [base, setBase] = useState(null); // janela de comparação (ontem/anteontem)
+  const seqRef = useState({ n: 0 })[0];
+  const debounceRef = useState({ t: null })[0];
 
-  const carregar = () => {
-    setCarregando(true);
+  const carregar = (fundo = false) => {
+    const minha = ++seqRef.n;
+    if (!fundo) setCarregando(true);
     const iv = intervalo;
+    const pronto = (atual, comparada) => {
+      if (minha !== seqRef.n) return; // resposta velha: descarta (sem drift).
+      setM(atual);
+      setBase(comparada);
+      setCarregando(false);
+    };
     if (iv && typeof iv === 'object' && iv.de) {
       // Janela exata: busca atual + base de comparação no MESMO instante.
       const ehOntem = periodo === 'Ontem';
       const jb = ehOntem ? janelaAnteontem() : janelaOntem();
       Promise.all([
-        getMetricasJanela(quizId, iv.de, iv.ate),
-        getMetricasJanela(quizId, jb.de, jb.ate),
-      ]).then(([atual, comparada]) => { setM(atual); setBase(comparada.resumo || null); })
-        .finally(() => setCarregando(false));
+        getMetricasJanela(quizId, iv.de, iv.ate).then(async (j) => ({
+          ...j,
+          resumo: await completarResumo(quizId, j.resumo, iv.de, iv.ate),
+        })),
+        getMetricasJanela(quizId, jb.de, jb.ate).then(async (j) => ({
+          ...j,
+          resumo: await completarResumo(quizId, j.resumo, jb.de, jb.ate),
+        })),
+      ]).then(([atual, comparada]) => pronto(atual, comparada.resumo || null))
+        .catch(() => { if (minha === seqRef.n) setCarregando(false); });
     } else {
-      setBase(null);
-      getMetricas(quizId, iv).then(setM).finally(() => setCarregando(false));
+      const janela = janelaDoPeriodo(iv);
+      getMetricas(quizId, iv)
+        .then(async (j) => ({
+          ...j,
+          resumo: await completarResumo(quizId, j.resumo, janela.de, janela.ate),
+        }))
+        .then((atual) => pronto(atual, null))
+        .catch(() => { if (minha === seqRef.n) setCarregando(false); });
     }
   };
 
   useEffect(() => { carregar(); /* eslint-disable-next-line */ }, [quizId, periodo]);
 
   useEffect(() => {
+    // Realtime com debounce: 1 reload a cada 3s, sem piscar nem sobrepor.
+    const recarregar = () => {
+      clearTimeout(debounceRef.t);
+      debounceRef.t = setTimeout(() => carregar(true), 3000);
+    };
     const ch = supabase.channel('ev-' + quizId)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'eventos', filter: `quiz_id=eq.${quizId}` }, () => carregar())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'eventos', filter: `quiz_id=eq.${quizId}` }, recarregar)
       .subscribe();
-    return () => supabase.removeChannel(ch);
+    return () => { clearTimeout(debounceRef.t); supabase.removeChannel(ch); };
     /* eslint-disable-next-line */
   }, [quizId, periodo]);
 
@@ -85,7 +111,7 @@ export default function Metricas({ quizId, periodo: periodoExt, onPeriodo, lang 
           <Kpi titulo={CARDS[lang][5]} valor={r.taxa_conclusao != null ? `${r.taxa_conclusao}%` : null} base={base?.taxa_conclusao != null ? `${base.taxa_conclusao}%` : null} numero={false} lang={lang} />
         </div>
         <div className="lg:col-span-3">
-          <FunilIdeal quizId={quizId} periodo={intervalo} resumo={r} lang={lang} />
+          <FunilIdeal resumo={r} lang={lang} />
         </div>
       </div>
 
