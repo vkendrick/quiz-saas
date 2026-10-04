@@ -1,0 +1,241 @@
+{
+ "id": "el-vendas-02",
+ "nome": "Vendas direta com módulos",
+ "uso": "Ideal para: vendas com módulos em cards e garantia.",
+ "ordem": [
+  "hero",
+  "vsl",
+  "dor",
+  "produto",
+  "autor",
+  "autor",
+  "autor",
+  "autor",
+  "autor",
+  "autor",
+  "autor",
+  "autor",
+  "autor",
+  "preco",
+  "depoimentos",
+  "garantia",
+  "cta",
+  "faq"
+ ],
+ "blocos": [
+  {
+   "id": "el-el-vendas-02-1",
+   "tipo": "hero",
+   "dados": {
+    "eyebrow": "",
+    "h1": "Descubra o Segredo para Lucrar com a Manutenção de Smartphones começando seu Negócio do Zero!",
+    "sub": "o Método Infalível para Iniciar Seu Próprio Negócio de Manutenção de Smartphones do Zero Ganhe Dinheiro Realizando Reparos Simples e Lucrativos!\"",
+    "cta": "QUERO TER MEU PRÓPRIO NEGÓCIO",
+    "prova": ""
+   }
+  },
+  {
+   "id": "el-el-vendas-02-2",
+   "tipo": "vsl",
+   "dados": {
+    "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+   }
+  },
+  {
+   "id": "el-el-vendas-02-3",
+   "tipo": "dor",
+   "dados": {
+    "titulo": "É possível faturar ter um negócio lucrativo com pouco investimento e começando do zero?",
+    "itens": [
+     "Falta de Conhecimento Técnico Inicial",
+     "Investimento Elevado em Ferramentas e Equipamentos",
+     "Estratégias de Marketing Ineficazes",
+     "Medo de Falhar e Insegurança Empresarial"
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-02-4",
+   "tipo": "produto",
+   "dados": {
+    "titulo": "A solução para faturar ter um negócio Lucrativo com manutenção de Smartphone",
+    "sub": "Depois de vários anos no mercado da manutenção de SmartPhone e desenvolvi uma metodologia baseada em 4 pontos que vai te ajudar a conquistar cliente,ter uma boa taxa de recorrência e faturar 4 mil rea",
+    "checklist": [
+     "Aprenda as bases da Manutenção de Smartphone, incluindo tipos de reparos, ferramentas e fornecedores.",
+     "Descubra como atender clientes sem precisar de uma grande estrutura",
+     "Explore técnicas para divulgar o seu trabalho",
+     "Descubra como otimizar seu tempo para aumentar a produtividade e atingir suas metas financeiras.",
+     "Saiba como gerenciar as finanças do seu negócio de costura, incluindo precificação, orçamentos e economia."
+    ],
+    "mockup_url": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/01_diagram_info.png"
+   }
+  },
+  {
+   "id": "el-el-vendas-02-5",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/m01.png",
+    "nome": "Introdução ao Mundo da Manutenção de Smartphones",
+    "bio": "Este módulo fornece uma visão abrangente do setor de manutenção de smartphones, abordando a evolução do mercado, as oportunidades disponíveis e as habilidades essenciais necessárias para se destacar. Os alunos serão introduzidos aos conceitos básicos que os prepararão para os módulos subsequentes.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-02-6",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/m02.png",
+    "nome": "Ferramentas e Equipamentos Essenciais",
+    "bio": "Você Aprenderá sobre as ferramentas e equipamentos fundamentais necessários para a manutenção de smartphones. Exploraremos opções acessíveis, dicas de compra inteligente e como montar um kit de trabalho eficiente, garantindo que o investimento inicial seja otimizado.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-02-7",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/m03.png",
+    "nome": "Diagnóstico e Identificação de Problemas Comuns",
+    "bio": "Este módulo concentra-se no desenvolvimento de habilidades de diagnóstico, ensinando os alunos a identificar problemas comuns em smartphones. Compreender como diagnosticar corretamente é crucial para oferecer um serviço eficaz e construir a confiança dos clientes.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-02-8",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/m04.png",
+    "nome": "Técnicas Avançadas de Reparo",
+    "bio": "Chegando ao nível PRO, este módulo abrange técnicas avançadas de reparo. Os participantes aprenderão a lidar com problemas mais complexos, como substituição de componentes específicos, resolvendo desafios que podem aumentar significativamente a lucratividade do negócio.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-02-9",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/m05.png",
+    "nome": "Estratégias de Marketing e Construção de Clientela",
+    "bio": "Você vai aprender estratégias de marketing específicas para o setor de manutenção de smartphones. Desde a criação de uma presença online impactante até estratégias de networking local, os participantes aprenderão a promover eficientemente seus serviços e construir uma base de clientes sólida.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-02-10",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/m06.png",
+    "nome": "Atendimento ao Cliente e Fidelização:",
+    "bio": "O último módulo concentra-se no aspecto empresarial do empreendimento. Desde a gestão financeira até a expansão do negócio, os participantes aprenderão a estabelecer práticas eficazes para garantir o crescimento sustentável de sua operação de manutenção de smartphones.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-02-11",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/453.png",
+    "nome": "E-book Gestão do Tempo",
+    "bio": "Descubra como otimizar seu tempo para aumentar a produtividade e atingir suas metas financeiras.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-02-12",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/453.png",
+    "nome": "Planner Financeiro:",
+    "bio": "Saiba como gerenciar as finanças do seu negócio de costura, incluindo precificação, orçamentos e economia.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-02-13",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/Mockup32.png",
+    "nome": "João Silva",
+    "bio": "João Silva, um visionário autodidata, construiu um império no setor de consertos de smartphones partindo do zero. Sem formação universitária, João transformou sua paixão por tecnologia em uma jornada empreendedora impressionante. Hoje, ele é o fundador e proprietário de três bem-sucedidas assistênci",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-02-14",
+   "tipo": "preco",
+   "dados": {
+    "de": "R$19,70",
+    "por": "R$197,00",
+    "label": "",
+    "inclui": [
+     "Bônus do curso",
+     "Bônus do curso",
+     "Bônus do curso"
+    ],
+    "parcelas": "em até 12x no cartão",
+    "pix": "",
+    "cta": "QUERO GARANTIR A MINHA VAGA!",
+    "garantia": ""
+   }
+  },
+  {
+   "id": "el-el-vendas-02-15",
+   "tipo": "depoimentos",
+   "dados": {
+    "titulo": "Essas alunas também ja estão tendo resultados:",
+    "estilo": "grade",
+    "deps": [
+     {
+      "foto": "",
+      "texto": "",
+      "nome": "Leonardo Santos"
+     },
+     {
+      "foto": "",
+      "texto": "",
+      "nome": "Pedro Alves"
+     },
+     {
+      "foto": "",
+      "texto": "",
+      "nome": "Luiz Silva"
+     },
+     {
+      "foto": "",
+      "texto": "",
+      "nome": "Cleiton Lucio"
+     }
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-02-16",
+   "tipo": "garantia",
+   "dados": {
+    "titulo": "Sua satisfação é garantida !",
+    "texto": "Você adquire agora o acesso completo ao [ÑOME DO CURSO] pela condição especial de R$ 97,00 e tem 7 dias para avaliar. Se por algum motivo você achar que este material não é pra você, ou que não vale o investimento, basta me enviar uma mensagem que devolvo integralmente seu dinheiro. Agora a decisão ",
+    "dias": "7"
+   }
+  },
+  {
+   "id": "el-el-vendas-02-17",
+   "tipo": "cta",
+   "dados": {
+    "texto": "QUERO EXPERIMENTAR AGORA"
+   }
+  },
+  {
+   "id": "el-el-vendas-02-18",
+   "tipo": "faq",
+   "dados": {
+    "titulo": "Perguntas frequentes",
+    "faqs": [
+     {
+      "p": "Como funciona?",
+      "r": "Edite as perguntas no editor visual."
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,21 @@
+{
+ "id": "el-obrigado",
+ "nome": "Obrigado com grupo VIP",
+ "uso": "Ideal para: pós-captura direcionando ao WhatsApp.",
+ "ordem": [
+  "hero"
+ ],
+ "blocos": [
+  {
+   "id": "el-el-obrigado-1",
+   "tipo": "hero",
+   "dados": {
+    "eyebrow": "",
+    "h1": "Para finalizar sua inscrição e receber todo material entre agora no Grupo do WhatsApp",
+    "sub": "",
+    "cta": "Entrar no GrupoVIP",
+    "prova": ""
+   }
+  }
+ ]
+}

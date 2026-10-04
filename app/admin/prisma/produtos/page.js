@@ -9,6 +9,8 @@ const VAZIO = {
   slugAuto: true,
   name_pt: "",
   name_es: "",
+  descricao_pt: "",
+  descricao_es: "",
   type: "core",
   price_model: "one_time",
   delivery: "ambos",
@@ -92,6 +94,8 @@ export default function Produtos() {
       slugAuto: false,
       name_pt: p.name?.pt || "",
       name_es: p.name?.es || "",
+      descricao_pt: p.descricao?.pt || "",
+      descricao_es: p.descricao?.es || "",
       type: p.type,
       price_model: p.price_model,
       delivery: p.delivery,
@@ -146,6 +150,7 @@ export default function Produtos() {
       product: {
         slug: edit.slug,
         name: { pt: edit.name_pt, es: edit.name_es || edit.name_pt },
+        descricao: { pt: edit.descricao_pt || "", es: edit.descricao_es || edit.descricao_pt || "" },
         type: edit.type,
         price_model: edit.price_model,
         delivery: edit.delivery,
@@ -500,8 +505,40 @@ export default function Produtos() {
                   />
                 </div>{" "}
               </div>{" "}
+              <div className="grid2">
+                {" "}
+                <div>
+                  <label>Descrição PT (aparece na área de membros)</label>
+                  <textarea
+                    rows={2}
+                    value={edit.descricao_pt}
+                    onChange={(e) => set("descricao_pt", e.target.value)}
+                    placeholder="O que o aluno recebe neste produto"
+                  />
+                </div>{" "}
+                <div>
+                  <label>Descrição ES</label>
+                  <textarea
+                    rows={2}
+                    value={edit.descricao_es}
+                    onChange={(e) => set("descricao_es", e.target.value)}
+                  />
+                </div>{" "}
+              </div>{" "}
               {/* Tipo, Entrega e Status agora ficam na Área de membros */}
               {/* Entrega: pagou → abre a área/download sozinho (link da oferta) */}
+              <div>
+                <label>Tipo (principal aparece na área; bump/upsell liberam partes)</label>
+                <select
+                  value={edit.type || "core"}
+                  onChange={(e) => set("type", e.target.value)}
+                >
+                  <option value="core">Principal</option>
+                  <option value="order-bump">Order bump</option>
+                  <option value="upsell">Upsell</option>
+                  <option value="downsell">Downsell</option>
+                </select>
+              </div>{" "}
             </div>{" "}
             <div className="card">
               {" "}

@@ -103,7 +103,31 @@ export async function POST(request) {
   ].includes(item.grupo)
     ? item.grupo
     : "principal";
-  // Campos 030/032/033 (preço/checkout/ativo/foto/descricao/link_ativo); caem no fallback se SQL não rodou.
+  // Campos 030/032/033 (preço/checkout/ativo/foto/descricao/link_ativo)
+  // + 053 (oferta_product_id: qual produto comprado libera este item);
+  // caem no fallback se SQL não rodou.
+  let ofertaPid = Symbol("nao-enviado");
+  if (item.oferta_product_slug !== undefined) {
+    ofertaPid = null;
+    const ops = String(item.oferta_product_slug || "").trim().toLowerCase();
+    if (ops) {
+      const { data: trow } = await supabase
+        .from("tenants")
+        .select("id")
+        .eq("slug", tenant)
+        .single();
+      if (trow) {
+        const { data: oprod } = await supabase
+          .from("products")
+          .select("id")
+          .eq("tenant_id", trow.id)
+          .eq("slug", ops)
+          .limit(1)
+          .single();
+        if (oprod) ofertaPid = oprod.id;
+      }
+    }
+  }
   const extra030 = {
     grupo,
     preco: preco >= 0 ? preco : null,
@@ -114,6 +138,7 @@ export async function POST(request) {
     foto_url: item.foto_url || null,
     descricao: item.descricao || null,
     link_ativo: item.link_ativo === false ? false : true,
+    ...(typeof ofertaPid === "symbol" ? {} : { oferta_product_id: ofertaPid }),
   };
   let ins = await supabase
     .from("content_items")
@@ -123,7 +148,7 @@ export async function POST(request) {
   if (
     ins.error &&
     String(ins.error.message || "").match(
-      /grupo|preco|moeda|checkout|ativo|foto|descricao|link_ativo/,
+      /grupo|preco|moeda|checkout|ativo|foto|descricao|link_ativo|oferta_product/,
     )
   ) {
     // Sem 026/030/032/033: salva sem grupo e sem campos novos.

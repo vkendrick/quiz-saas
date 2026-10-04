@@ -4,6 +4,7 @@
 // Props: tenant, slug.
 "use client";
 import { useEffect, useState } from "react";
+import { fmtMoney } from "@/lib/moeda";
 
 const slugify = (s) =>
   String(s || "")
@@ -28,6 +29,7 @@ const NI0 = {
   moeda: "BRL",
   checkout_url: "",
   checkout_plataforma: "outro",
+  oferta_product_slug: "",
   ativo: true,
   foto_url: "",
   descricao: "",
@@ -40,6 +42,7 @@ export default function ConteudoOferta({ tenant, slug }) {
   const [editKey, setEditKey] = useState(null);
   const [mostrarForm, setMostrarForm] = useState(false);
   const [msg, setMsg] = useState(null);
+  const [prods, setProds] = useState([]);
 
   const load = async () => {
     const r = await fetch(
@@ -48,6 +51,10 @@ export default function ConteudoOferta({ tenant, slug }) {
       .then((r) => r.json())
       .catch(() => ({}));
     if (r.ok) setItems(r.items || []);
+    const pr = await fetch(`/api/prisma/admin/products?tenant=${tenant}`)
+      .then((r) => r.json())
+      .catch(() => ({}));
+    if (pr.ok || pr.products) setProds(pr.products || []);
   };
   useEffect(() => {
     setNi(NI0);
@@ -94,6 +101,7 @@ export default function ConteudoOferta({ tenant, slug }) {
       moeda: it.moeda || "BRL",
       checkout_url: it.checkout_url || "",
       checkout_plataforma: it.checkout_plataforma || "outro",
+      oferta_product_slug: (prods || []).find((p) => p.id === it.oferta_product_id)?.slug || "",
       ativo: it.ativo !== false,
       foto_url: it.foto_url || "",
       descricao: it.descricao || "",
@@ -190,7 +198,8 @@ export default function ConteudoOferta({ tenant, slug }) {
             <th>#</th>
             <th>Arquivo</th>
             {!compacto && <th>Tipo</th>}
-            <th>Parte</th>
+              <th>Parte</th>
+              <th>Libera</th>
             {!compacto && <th>Preço</th>}
             <th>Status</th>
             <th></th>
@@ -211,7 +220,19 @@ export default function ConteudoOferta({ tenant, slug }) {
             >
               <td className="mut">{i + 1}</td>
               <td>
-                <b>{it.title?.pt || it.key}</b>
+                <b
+                  title={it.title?.pt || it.key}
+                  style={{
+                    display: "inline-block",
+                    maxWidth: 300,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    verticalAlign: "bottom",
+                  }}
+                >
+                  {it.title?.pt || it.key}
+                </b>
               </td>
               {!compacto && (
                 <td className="mut">
@@ -220,10 +241,16 @@ export default function ConteudoOferta({ tenant, slug }) {
                 </td>
               )}
               <td className="mut">{it.grupo || "principal"}</td>
+              <td className="mut">
+                {["order-bump", "upsell", "downsell"].includes(it.grupo || "")
+                  ? (prods || []).find((p) => p.id === it.oferta_product_id)
+                      ?.slug || "travado"
+                  : "—"}
+              </td>
               {!compacto && (
                 <td className="mut">
                   {it.preco != null && it.preco !== ""
-                    ? `${it.moeda || ""} ${it.preco}`
+                    ? fmtMoney(it.preco, it.moeda)
                     : "—"}
                 </td>
               )}
@@ -419,6 +446,26 @@ export default function ConteudoOferta({ tenant, slug }) {
             onChange={(e) => setNi({ ...ni, checkout_url: e.target.value })}
           />
         </>
+      )}
+      {precisaVenda(ni.grupo) && (
+        <div>
+          <label>Produto que libera esta parte (só abre p/ quem comprou ele)</label>
+          <select
+            className="co-in"
+            value={ni.oferta_product_slug || ""}
+            onChange={(e) =>
+              setNi({ ...ni, oferta_product_slug: e.target.value })
+            }
+          >
+            <option value="">— travado (ninguém abre) —</option>
+            {(prods || []).map((p) => (
+              <option key={p.id || p.slug} value={p.slug}>
+                {p.slug}
+                {p.type && p.type !== "core" ? ` (${p.type})` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
       )}
       {ni.kind === "texto" && (
         <>

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Volta from "@/components/Volta";
 import { useTema, temaCSS } from "@/lib/tema";
+import { fmtMoney } from "@/lib/moeda";
 
 const STR = {
   pt: {
@@ -16,6 +17,7 @@ const STR = {
     bloqueado: "Disponível após a liberação",
     bonus: "Bônus",
     ofertas: "Ofertas para você",
+    extras: "Mais para você",
     produtos: "Produtos",
     quero: "Quero este",
     abrir: "Abrir",
@@ -33,6 +35,7 @@ const STR = {
     bloqueado: "Disponible tras la liberación",
     bonus: "Bono",
     ofertas: "Ofertas para ti",
+    extras: "Más para ti",
     produtos: "Productos",
     quero: "Lo quiero",
     abrir: "Abrir",
@@ -47,6 +50,21 @@ const CSS = `
 *{box-sizing:border-box;margin:0;padding:0}
 .prisma{min-height:100vh;background:#F4F7F6;color:#1A1A1A;font-family:Georgia,serif;padding:0 0 60px}
 .hero{background:linear-gradient(160deg,#0f3d2e 0%,#1a7a5e 100%);color:#fff;padding:36px 20px 44px}
+.hero .wrap{max-width:760px}
+.wrap.wide{max-width:1140px}
+.lay{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+.sidecol{position:sticky;top:12px;margin-top:-24px}
+@media(max-width:900px){.lay{grid-template-columns:1fr}.sidecol{position:static;margin-top:0}}
+.hero-row{display:flex;gap:22px;align-items:center}
+.hero-logo{width:124px;height:124px;object-fit:contain;background:#fff;border-radius:20px;padding:8px;flex-shrink:0;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.hero-logo.marca{display:flex;align-items:center;justify-content:center;color:#0f5240;font-weight:800;font-size:15px;text-align:center}
+.selslim{max-width:340px;background:#fff;border:1px solid #D0E8DF;border-radius:10px;padding:10px 12px;font-size:14px;color:#1A1A1A;width:100%}
+.ocard{background:#fff;border:1px solid #D0E8DF;border-radius:14px;padding:14px;margin-bottom:12px}
+.ocard .otitulo{font-weight:700;font-size:14px;margin:8px 0 4px;font-family:-apple-system,'Segoe UI',Roboto,sans-serif}
+.ocard .odesc{font-size:12px;color:#4a4a4a;line-height:1.5;font-family:-apple-system,'Segoe UI',Roboto,sans-serif}
+.ocard .opreco{font-weight:800;font-size:19px;margin:10px 0 2px}
+.ocard .btn{display:block;text-align:center;margin-top:10px}
+.ocard img{width:100%;border-radius:10px;display:block;background:#E8F5F0}
 .hero .wrap,.wrap{max-width:760px;margin:0 auto;padding:0 16px}
 .hero .olá{font-family:-apple-system,'Segoe UI',Roboto,sans-serif;font-size:13px;opacity:.7;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
 .hero h1{font-size:30px;font-weight:400}
@@ -80,11 +98,14 @@ const CSS = `
 .cols{display:grid;grid-template-columns:1fr;gap:16px}
 @media(min-width:900px){.cols.side{grid-template-columns:1fr 280px}.side aside .fcard{min-width:0;max-width:none}}
 .blkt{font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#0f5240;margin:18px 0 8px}
+.pdesc{font-size:14px;color:#4a4a4a;line-height:1.6;margin:2px 0 12px}
 .err{max-width:560px;margin:80px auto;text-align:center;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:#4a4a4a;padding:24px}
 .lang{position:fixed;top:12px;right:12px;display:flex;gap:6px;z-index:10}
 .lang button{background:rgba(255,255,255,.9);border:1px solid #D0E8DF;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer}
 @media(max-width:560px){
 .hero{padding:28px 0 36px}.hero h1{font-size:24px}
+.hero-row{flex-direction:column;text-align:center}
+.hero-logo{width:92px;height:92px}
 .prod{padding:18px 14px}
 .item{flex-wrap:wrap;row-gap:8px}
 .item .nm{flex:1 1 100%;order:-1;font-size:14px}
@@ -258,7 +279,7 @@ function LinhaItem({ tenant, p, it, lang, t, concluir, acento }) {
           >
             🛒{" "}
             {it.preco != null && it.preco !== ""
-              ? `${it.moeda || ""} ${it.preco}`
+              ? fmtMoney(it.preco, it.moeda)
               : t.comprar}
           </a>
         ) : (
@@ -268,7 +289,7 @@ function LinhaItem({ tenant, p, it, lang, t, concluir, acento }) {
   );
 }
 
-function SecaoProduto({ tenant, p, lang, t, concluir }) {
+function SecaoProduto({ tenant, p, lang, t, concluir, unico }) {
   const acento = p.product_tema?.cor_primaria || "#1A7A5E";
   const itens = p.items || [];
   const conteudo = itens.filter(
@@ -277,17 +298,26 @@ function SecaoProduto({ tenant, p, lang, t, concluir }) {
       it.kind !== "fisico" &&
       it.kind !== "texto",
   );
-  const ofertas = itens.filter((it) => GRUPO_OFERTA.includes(it.grupo));
-  const fisicos = itens.filter((it) => it.kind === "fisico");
   const textos = itens.filter((it) => it.kind === "texto");
   const isWa = (u) => /wa\.me|api\.whatsapp/i.test(u || "");
   return (
     <section className="prod">
-      <div className="ph">
-        <h2>
-          {p.product_name?.[lang] || p.product_name?.es || p.product_name?.pt}
-        </h2>
-      </div>
+      {!unico && (
+        <div className="ph">
+          <h2>
+            {p.product_name?.[lang] || p.product_name?.es || p.product_name?.pt}
+          </h2>
+        </div>
+      )}
+      {(p.product_descricao?.[lang] ||
+        p.product_descricao?.es ||
+        p.product_descricao?.pt) && (
+        <p className="pdesc">
+          {p.product_descricao?.[lang] ||
+            p.product_descricao?.es ||
+            p.product_descricao?.pt}
+        </p>
+      )}
       <div className="pbar">
         <i
           style={{
@@ -309,8 +339,7 @@ function SecaoProduto({ tenant, p, lang, t, concluir }) {
           </ul>
         </div>
       )}
-      <div className={fisicos.length ? "cols side" : "cols"}>
-        <div>
+      <div>
           {conteudo.map((it) => (
             <LinhaItem
               key={it.key}
@@ -323,23 +352,6 @@ function SecaoProduto({ tenant, p, lang, t, concluir }) {
               acento={acento}
             />
           ))}
-          {!!ofertas.length && (
-            <>
-              <div className="blkt">{t.ofertas}</div>
-              {ofertas.map((it) => (
-                <LinhaItem
-                  key={it.key}
-                  tenant={tenant}
-                  p={p}
-                  it={it}
-                  lang={lang}
-                  t={t}
-                  concluir={concluir}
-                  acento={acento}
-                />
-              ))}
-            </>
-          )}
 
           {textos.map((it) => (
             <div key={it.key} className="txtcard">
@@ -374,20 +386,147 @@ function SecaoProduto({ tenant, p, lang, t, concluir }) {
             </div>
           ))}
         </div>
-        {!!fisicos.length && (
-          <aside>
-            <div className="blkt" style={{ marginTop: 0 }}>
-              {t.produtos}
-            </div>
-            {fisicos.map((it) => (
-              <div key={it.key} className="fcard">
+    </section>
+  );
+}
+
+function BarraLateral({ tenant, p, lang, t, concluir }) {
+  if (!p) return null;
+  const acento = p.product_tema?.cor_primaria || "#1A7A5E";
+  const itens = p.items || [];
+  const ofertas = itens.filter((it) => GRUPO_OFERTA.includes(it.grupo));
+  const fisicos = itens.filter((it) => it.kind === "fisico");
+  const externos = p.externos || [];
+  if (!ofertas.length && !fisicos.length && !externos.length) return null;
+  return (
+    <>
+      {!!ofertas.length && (
+        <>
+          <div className="blkt" style={{ marginTop: 0 }}>
+            {t.ofertas}
+          </div>
+          {ofertas.map((it) =>
+            it.locked !== false ? (
+              <div key={it.key} className="ocard">
+                <span
+                  className="gtag"
+                  style={{ background: "#FDE8E8", color: "#991B1B" }}
+                >
+                  {t.naoAdq}
+                </span>
+                <div className="otitulo">
+                  {it.title?.[lang] || it.title?.es || it.title?.pt}
+                </div>
+                {it.descricao && <div className="odesc">{it.descricao}</div>}
+              {it.preco != null && it.preco !== "" && (
+                <div className="opreco">
+                  {fmtMoney(it.preco, it.moeda)}
+                </div>
+              )}
+                {it.checkout_url ? (
+                  <a
+                    className="btn"
+                    style={{
+                      background: acento,
+                      textDecoration: "none",
+                      whiteSpace: "nowrap",
+                    }}
+                    href={urlCompra(p, it)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    🛒 {t.comprar}
+                  </a>
+                ) : (
+                  <div className="ppct" style={{ marginTop: 8 }}>
+                    {t.bloqueado}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div key={it.key} className="ocard">
+                <span
+                  className="gtag"
+                  style={{ background: "#E8F5F0", color: "#0f5240" }}
+                >
+                  ✓ Adquirido
+                </span>
+                <div className="otitulo">
+                  {it.title?.[lang] || it.title?.es || it.title?.pt}
+                </div>
+                <a
+                  className="btn ghost"
+                  style={{ textDecoration: "none", marginTop: 8 }}
+                  href={`/api/prisma/member/download?tenant=${tenant}&product=${p.product_id}&key=${it.key}`}
+                >
+                  ⬇ {it.kind === "video" ? t.ver : t.baixar}
+                </a>
+                {!it.completed && (
+                  <button
+                    className="btn"
+                    style={{ background: acento, marginTop: 8 }}
+                    onClick={() => concluir(p.product_id, it.key)}
+                  >
+                    {t.concluir}
+                  </button>
+                )}
+              </div>
+            ),
+          )}
+        </>
+      )}
+            {!!externos.length && (
+              <>
+                <div className="blkt" style={{ marginTop: 0 }}>
+                  {t.extras}
+                </div>
+                {externos.map((ex, i) => (
+                  <div key={ex.key || i} className="ocard">
+                    {ex.foto_url && (
+                      <img src={ex.foto_url} alt="" loading="lazy" />
+                    )}
+                    <div className="otitulo">{ex.titulo}</div>
+                    {ex.descricao && (
+                      <div className="odesc">{ex.descricao}</div>
+                    )}
+                    {ex.preco != null && ex.preco !== "" && (
+                      <div className="opreco">
+                        {fmtMoney(ex.preco, ex.moeda)}
+                      </div>
+                    )}
+                    {ex.checkout_url && (
+                      <a
+                        className="btn"
+                        style={{
+                          background: acento,
+                          textDecoration: "none",
+                          whiteSpace: "nowrap",
+                        }}
+                        href={ex.checkout_url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        🛒 {t.comprar}
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
+            {!!fisicos.length && (
+              <>
+                <div className="blkt" style={{ marginTop: 18 }}>
+                  {t.produtos}
+                </div>
+                {fisicos.map((it) => (
+                  <div key={it.key} className="fcard">
                 {it.foto_url && <img src={it.foto_url} alt="" loading="lazy" />}
                 <div className="fb">
                   <b>{it.title?.[lang] || it.title?.es || it.title?.pt}</b>
                   {it.descricao && <div className="fd">{it.descricao}</div>}
                   {it.preco != null && it.preco !== "" && (
                     <div className="fp">
-                      {it.moeda || ""} {it.preco}
+                      {fmtMoney(it.preco, it.moeda)}
                     </div>
                   )}
                   {it.checkout_url && it.link_ativo !== false && (
@@ -410,10 +549,9 @@ function SecaoProduto({ tenant, p, lang, t, concluir }) {
                 </div>
               </div>
             ))}
-          </aside>
-        )}
-      </div>
-    </section>
+              </>
+            )}
+    </>
   );
 }
 
@@ -428,6 +566,13 @@ function MembrosTema({
   concluir,
 }) {
   const tema = useTema(tenant);
+  // Só o que comprou: sem acesso não entra (nem aba "teste"/preview).
+  // Bump/upsell comprados liberam PARTES (sidebar), não viram aba.
+  const visiveis = (data.library || []).filter(
+    (p) =>
+      p.has_access &&
+      !["order-bump", "upsell", "downsell"].includes(p.product_type || "core"),
+  );
   return (
     <div className="prisma">
       <style>{CSS}</style>
@@ -437,89 +582,105 @@ function MembrosTema({
         <button onClick={() => setLang("es")}>ES</button>
       </div>
       <div className="hero">
-        <div className="wrap">
+        <div className="wrap hero-row">
           {tema?.logo_url ? (
-            <img
-              src={tema.logo_url}
-              alt=""
-              style={{ maxHeight: 72, marginBottom: 16, borderRadius: 12 }}
-            />
+            <img src={tema.logo_url} alt="" className="hero-logo" />
           ) : (
-            <div>
-              <span className="marca">{tenant}</span>
+            <div className="hero-logo marca">
+              <span>{tenant}</span>
             </div>
           )}
-          <p className="olá">{data.member?.name || data.member?.email}</p>
-          <h1 style={{ fontSize: 34 }}>{t.area}</h1>
-          <p style={{ opacity: 0.9, marginTop: 10, fontSize: 16 }}>
-            {lang === "pt"
-              ? "Bem-vindo à sua área exclusiva. Desfrute da sua aquisição! 🎉"
-              : "Bienvenido a tu área exclusiva. ¡Disfruta tu adquisición! 🎉"}
-          </p>
+          <div>
+            <p className="olá">{data.member?.name || data.member?.email}</p>
+            <h1 style={{ fontSize: 34 }}>{t.area}</h1>
+            <p style={{ opacity: 0.9, marginTop: 10, fontSize: 16 }}>
+              {lang === "pt"
+                ? "Bem-vindo à sua área exclusiva. Desfrute da sua aquisição! 🎉"
+                : "Bienvenido a tu área exclusiva. ¡Disfruta tu adquisición! 🎉"}
+            </p>
+          </div>
         </div>
       </div>
-      <div className="wrap" style={{ paddingTop: 16 }}>
+      <div className="wrap wide" style={{ paddingTop: 16 }}>
         <div
           style={{
             display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: 8,
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 10,
+            marginBottom: 12,
+            flexWrap: "wrap",
           }}
         >
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", flex: 1 }}>
+            {visiveis.length > 1 &&
+              (visiveis.length > 6 ? (
+                <select
+                  className="selslim"
+                  value={sel || ""}
+                  onChange={(e) => setSel(e.target.value)}
+                >
+                  {visiveis.map((p) => (
+                    <option key={p.product_id} value={p.product_id}>
+                      {p.product_name?.[lang] ||
+                        p.product_name?.es ||
+                        p.product_name?.pt}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                visiveis.map((p) => (
+                  <button
+                    key={p.product_id}
+                    onClick={() => setSel(p.product_id)}
+                    className={sel === p.product_id ? "btn" : "btn ghost"}
+                    style={{ margin: 0 }}
+                  >
+                    {p.product_name?.[lang] ||
+                      p.product_name?.es ||
+                      p.product_name?.pt}
+                  </button>
+                ))
+              ))}
+          </div>
           <button
+            className="btn ghost sm"
             onClick={async () => {
               await fetch("/api/prisma/auth/sair", { method: "POST" }).catch(
                 () => {},
               );
               location.href = `/${tenant}/acesso`;
             }}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#4a4a4a",
-              fontSize: 13,
-              cursor: "pointer",
-              textDecoration: "underline",
-            }}
           >
             {lang === "pt" ? "Sair" : "Salir"}
           </button>
         </div>
-        {(data.library || []).length > 1 && (
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              marginBottom: 4,
-              flexWrap: "wrap",
-            }}
-          >
-            {(data.library || []).map((p) => (
-              <button
-                key={p.product_id}
-                onClick={() => setSel(p.product_id)}
-                className={sel === p.product_id ? "btn" : "btn ghost"}
-                style={{ margin: 0 }}
-              >
-                {p.product_name?.[lang] ||
-                  p.product_name?.es ||
-                  p.product_name?.pt}
-              </button>
-            ))}
-          </div>
-        )}
-        {(data.library || [])
+        {visiveis
           .filter((p) => sel == null || p.product_id === sel)
           .map((p) => (
-            <SecaoProduto
-              key={p.product_id}
-              tenant={tenant}
-              p={p}
-              lang={lang}
-              t={t}
-              concluir={concluir}
-            />
+            <div key={p.product_id} className="lay">
+              <SecaoProduto
+                tenant={tenant}
+                p={p}
+                lang={lang}
+                t={t}
+                concluir={concluir}
+                unico={visiveis.length < 2}
+              />
+              <aside className="sidecol">
+                <BarraLateral tenant={tenant} p={p} lang={lang} t={t} concluir={concluir} />
+              </aside>
+            </div>
           ))}
+        {!visiveis.length && (
+          <div className="prod">
+            <p className="ppct">
+              {lang === "pt"
+                ? "Nenhuma oferta liberada ainda."
+                : "Ninguna oferta liberada todavía."}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

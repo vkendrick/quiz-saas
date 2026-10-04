@@ -4,6 +4,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
+import { PRESETS_CORES } from '@/lib/temas-presets';
 
 const CSS = `
 .prisma{min-height:100vh;background:#0B0E14;color:#E8ECF3;font-family:-apple-system,'Segoe UI',Roboto,Inter,sans-serif;padding:20px}
@@ -32,6 +33,15 @@ textarea{min-height:64px;resize:vertical}
 .mut{color:#9AA4B5;font-size:13px}
 iframe.prev{width:100%;height:640px;border:1px solid #232B3B;border-radius:12px;background:#fff}
 .okmsg{background:#0e2a20;border:1px solid #2EAA84;border-radius:10px;padding:10px;margin-bottom:12px;font-size:13px}
+.ajuste{background:#151A24;border:1px solid #232B3B;border-radius:14px;padding:16px;margin-bottom:14px}
+.ajuste h3{font-size:14px;margin-bottom:4px;color:#9AA4B5;text-transform:uppercase;letter-spacing:1px}
+.aj-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 12px}
+@media(max-width:900px){.aj-grid{grid-template-columns:1fr}}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
+.swatches button{background:#0E1420;border:1px solid #232B3B;color:#E8ECF3;border-radius:10px;padding:8px;cursor:pointer;font-size:12px;text-align:left}
+.swatches button.on{border-color:#2EAA84;box-shadow:0 0 0 1px #2EAA84}
+.swdots{display:flex;gap:3px;margin-bottom:6px}
+.swdots i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.25)}
 `;
 
 const TIPOS = [
@@ -41,7 +51,7 @@ const TIPOS = [
   ['countdown', 'Countdown'], ['galeria', 'Galeria'], ['para-quem', 'Para quem'],
   ['autor', 'Autor'], ['garantia', 'Garantia'], ['modulos', 'Módulos'],
   ['whatsapp', 'WhatsApp'], ['planos', 'Planos'], ['passos', 'Passos'], ['trust', 'Confiança'],
-  ['carrossel', 'Carrossel'],
+  ['carrossel', 'Carrossel'], ['captura', 'Captura (nome+e-mail)'],
 ];
 const NOMES = Object.fromEntries(TIPOS);
 const VAZIO = { alerta: { texto: '' }, hero: { eyebrow: '', h1: '', sub: '', cta: '', prova: '',
@@ -61,6 +71,7 @@ const VAZIO = { alerta: { texto: '' }, hero: { eyebrow: '', h1: '', sub: '', cta
   planos: { titulo: '', sub: '', itens: [] },
   passos: { titulo: '', itens: [] },
   carrossel: { titulo: '', sub: '', slides: [] },
+  captura: { titulo: '', sub: '', nome: true, botao: '', msg_ok: '' },
   trust: { itens: [] } };
 
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -116,6 +127,16 @@ export default function Editor() {
   const addObj = (k, vazio) => setD(k, [...(selBloco()?.dados?.[k] || []), vazio]);
   const delObj = (k, i) => setD(k, (selBloco()?.dados?.[k] || []).filter((_, j) => j !== i));
   const selBloco = () => blocos.find(b => b.id === sel);
+
+  // Ajustes da página (etapa 3: ficam no page.config, salvos junto).
+  const cfg = page?.config || {};
+  const setCfg = (k, v) => setPage(p => ({ ...p, config: { ...(p?.config || {}), [k]: v } }));
+  const setPreco = (k, v) => setCfg('preco', { ...((page?.config || {}).preco || {}), [k]: v });
+  const setMidia = (k, v) => setCfg('midia', { ...((page?.config || {}).midia || {}), [k]: v });
+  const setDep = (i, f, v) => {
+    const a = [...(cfg.depoimentos || [])]; a[i] = { ...a[i], [f]: v }; setCfg('depoimentos', a);
+  };
+  const coresAtuais = JSON.stringify(cfg.cores || null);
 
   const upload = async (file, cb) => {
     if (!file) return;
@@ -296,6 +317,10 @@ export default function Editor() {
       case 'whatsapp': return (<>
         <Linha k="texto" label="Texto" /><Linha k="numero" label="Número (só dígitos, com DDD+país)" />
         <Sel k="flutuante" label="Bolha flutuante" opcoes={[[false, 'Não (botão na seção)'], [true, 'Sim (canto da tela)']]} /></>);
+      case 'captura': return (<>
+        <Linha k="titulo" label="Título" /><Linha k="sub" label="Sub" area />
+        <Linha k="botao" label="Texto do botão" /><Linha k="msg_ok" label="Mensagem de sucesso" />
+        <Sel k="nome" label="Pedir nome" opcoes={[[true, 'Sim (nome + e-mail)'], [false, 'Não (só e-mail)']]} /></>);
       case 'planos': return (<>
         <Linha k="titulo" label="Título" /><Linha k="sub" label="Sub" />
         {(d.itens || []).map((x, i) => (
@@ -359,6 +384,63 @@ export default function Editor() {
           </span>
         </div>
         {msg && <div className="okmsg">{msg}</div>}
+        <div className="ajuste">
+          <h3>Ajustes da página (etapa 3)</h3>
+          <p className="mut">Oferta, preço, checkout, mídia, depoimentos e cores — vale quando a página usa o seed do modelo.</p>
+          <div className="aj-grid">
+            <div><label>Idioma</label>
+              <select value={cfg.lang || 'pt'} onChange={e => setCfg('lang', e.target.value)}>
+                <option value="pt">PT</option><option value="es">ES</option>
+              </select></div>
+            <div><label>Produto (slug, p/ tracking)</label>
+              <input value={cfg.product_slug || ''} onChange={e => setCfg('product_slug', e.target.value)} placeholder="codigo-da-unha" /></div>
+            <div><label>Checkout URL</label>
+              <input value={cfg.checkout_url || ''} onChange={e => setCfg('checkout_url', e.target.value)} placeholder="https://..." /></div>
+          </div>
+          <div className="aj-grid">
+            <div><label>Preço “de”</label>
+              <input value={cfg.preco?.de || ''} onChange={e => setPreco('de', e.target.value)} placeholder="De R$97" /></div>
+            <div><label>Preço “por”</label>
+              <input value={cfg.preco?.por || ''} onChange={e => setPreco('por', e.target.value)} placeholder="R$37" /></div>
+            <div><label>VSL — URL do vídeo</label>
+              <input value={cfg.midia?.video_url || ''} onChange={e => setMidia('video_url', e.target.value)} placeholder="https://www.youtube.com/embed/..." /></div>
+          </div>
+          <div><label>Mockup (URL da imagem)</label>
+            <div className="row" style={{ marginTop: 0 }}>
+              <input style={{ flex: 1 }} value={cfg.midia?.mockup_url || ''} onChange={e => setMidia('mockup_url', e.target.value)} placeholder="https://..." />
+              <label className="btn ghost" style={{ cursor: 'pointer' }}>Enviar
+                <input type="file" accept="image/*" style={{ display: 'none' }}
+                  onChange={e => upload(e.target.files[0], (u) => setMidia('mockup_url', u))} />
+              </label>
+            </div></div>
+          <div><label>Depoimentos (foto + texto — vazio usa os do tema)</label>
+            {(cfg.depoimentos || []).map((x, i) => (
+              <div key={i} className="obj">
+                <input value={x.texto || ''} onChange={e => setDep(i, 'texto', e.target.value)} placeholder="Texto" />
+                <div className="row">
+                  <input style={{ flex: 1 }} value={x.nome || ''} onChange={e => setDep(i, 'nome', e.target.value)} placeholder="Nome" />
+                  <input style={{ flex: 1 }} value={x.foto || ''} onChange={e => setDep(i, 'foto', e.target.value)} placeholder="Foto URL" />
+                  <button className="btn danger" onClick={() => setCfg('depoimentos', (cfg.depoimentos || []).filter((_, j) => j !== i))}>X</button>
+                </div>
+              </div>
+            ))}
+            <button className="btn ghost" onClick={() => setCfg('depoimentos', [...(cfg.depoimentos || []), { texto: '', nome: '', foto: '' }])}>+ depoimento</button></div>
+          <div><label>Cores da página (10 prontas — ou padrão do tema)</label>
+            <div className="swatches">
+              <button className={!cfg.cores ? 'on' : ''} onClick={() => setCfg('cores', null)}>Padrão do tema</button>
+              {PRESETS_CORES.map(pr => (
+                <button key={pr.id} className={coresAtuais === JSON.stringify(pr.cores) ? 'on' : ''}
+                  onClick={() => setCfg('cores', pr.cores)} title={pr.nome}>
+                  <span className="swdots">
+                    <i style={{ background: pr.cores.verde }} />
+                    <i style={{ background: pr.cores.fundo }} />
+                    <i style={{ background: pr.cores.amarelo }} />
+                  </span>
+                  {pr.nome}
+                </button>
+              ))}
+            </div></div>
+        </div>
         <div className="grid">
           <div className="card">
             <h3>Blocos (arraste mental: ↑↓)</h3>

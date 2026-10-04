@@ -99,6 +99,7 @@ export async function POST(request) {
     tenant_id: tid,
     slug: String(product.slug).toLowerCase().trim(),
     name: product.name || {},
+    descricao: product.descricao || {},
     type: product.type || 'core',
     price_model: product.price_model || 'one_time',
     delivery: product.delivery || 'ambos',
@@ -112,7 +113,13 @@ export async function POST(request) {
     bonuses: product.bonuses || [],
     active: product.active !== false,
   };
-  const { data: saved, error } = await supabase.from('products').upsert(row, { onConflict: 'tenant_id,slug' }).select().single();
+  let saved, error;
+  ({ data: saved, error } = await supabase.from('products').upsert(row, { onConflict: 'tenant_id,slug' }).select().single());
+  if (error && /descricao/i.test(error.message || '')) {
+    // Sem 054: salva sem descricao.
+    const { descricao, ...semDesc } = row;
+    ({ data: saved, error } = await supabase.from('products').upsert(semDesc, { onConflict: 'tenant_id,slug' }).select().single());
+  }
   if (error) return Response.json({ error: error.message }, { status: 400 });
 
   await supabase.from('product_prices').delete().eq('product_id', saved.id);

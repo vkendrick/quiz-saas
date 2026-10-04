@@ -1,0 +1,239 @@
+{
+ "id": "el-vendas-01",
+ "nome": "Vendas longa com vídeo",
+ "uso": "Ideal para: vendas com VSL, objeções, método, bônus e FAQ.",
+ "ordem": [
+  "hero",
+  "vsl",
+  "produto",
+  "dor",
+  "produto",
+  "modulos",
+  "bonus",
+  "autor",
+  "preco",
+  "depoimentos",
+  "garantia",
+  "cta",
+  "faq",
+  "cta"
+ ],
+ "blocos": [
+  {
+   "id": "el-el-vendas-01-1",
+   "tipo": "hero",
+   "dados": {
+    "eyebrow": "",
+    "h1": "Descubra como escreva aqui a sua headline de venda",
+    "sub": "O Passo a Passo mais rápido para escreva aqui a sua subhead para reforçar a promessa do seu produto.",
+    "cta": "SIM! QUERO COMEÇAR A VENDER TODOS OS DIAS",
+    "prova": ""
+   }
+  },
+  {
+   "id": "el-el-vendas-01-2",
+   "tipo": "vsl",
+   "dados": {
+    "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+   }
+  },
+  {
+   "id": "el-el-vendas-01-3",
+   "tipo": "produto",
+   "dados": {
+    "titulo": "Descubra como escreva aqui a sua headline de venda",
+    "sub": "O Passo a Passo mais rápido para escreva aqui a sua subheadline para reforçar a promessa do seu produto.",
+    "checklist": [
+     "Escreva aqui ponto positivo do curso",
+     "Escreva aqui ponto positivo do curso",
+     "Escreva aqui ponto positivo do curso",
+     "Escreva aqui ponto positivo do curso"
+    ],
+    "mockup_url": "https://jeffersonwalves.com.br/wp-content/uploads/2024/04/modelo_capa.jpeg"
+   }
+  },
+  {
+   "id": "el-el-vendas-01-4",
+   "tipo": "dor",
+   "dados": {
+    "titulo": "É possível faturar 4 mil reais costurando em casa ?",
+    "itens": [
+     "Não sabe como precificar os seus serviços",
+     "Não tem previsibilidade de ganhos",
+     "Não sabe como fidelizar clientes",
+     "Trabalha de maneira amadora"
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-01-5",
+   "tipo": "produto",
+   "dados": {
+    "titulo": "A solução para faturar 4 mil reais todos os meses",
+    "sub": "Depois de vários anos no mercado da costura eu desenvolvi uma metodologia baseada em 4 pontos que vai te ajudar a conquistar cliente,ter uma boa taxa de recorrência e faturar 4 mil reais por mês costu",
+    "checklist": [
+     "Aprenda as bases da costura, incluindo tipos de tecidos, pontos, e máquinas de costura.",
+     "Descubra como criar roupas sob medida, desde saias simples até vestidos elaborados.",
+     "Explore técnicas para personalizar roupas e acessórios, tornando-os únicos e exclusivos.",
+     "Descubra como otimizar seu tempo para aumentar a produtividade e atingir suas metas financeiras.",
+     "Saiba como gerenciar as finanças do seu negócio de costura, incluindo precificação, orçamentos e economia."
+    ],
+    "mockup_url": "https://jeffersonwalves.com.br/wp-content/uploads/2023/09/metodo-board.png"
+   }
+  },
+  {
+   "id": "el-el-vendas-01-6",
+   "tipo": "modulos",
+   "dados": {
+    "titulo": "Veja tudo o que você vai aprender",
+    "sub": "",
+    "itens": [
+     {
+      "titulo": "Aprenda as bases da costura, incluindo tipos de tecidos, pontos, e máquinas de costura.",
+      "desc": ""
+     },
+     {
+      "titulo": "Aprenda as bases da costura, incluindo tipos de tecidos, pontos, e máquinas de costura.",
+      "desc": ""
+     },
+     {
+      "titulo": "Aprenda as bases da costura, incluindo tipos de tecidos, pontos, e máquinas de costura.",
+      "desc": ""
+     },
+     {
+      "titulo": "Aprenda as bases da costura, incluindo tipos de tecidos, pontos, e máquinas de costura.",
+      "desc": ""
+     },
+     {
+      "titulo": "Aprenda as bases da costura, incluindo tipos de tecidos, pontos, e máquinas de costura.",
+      "desc": ""
+     },
+     {
+      "titulo": "Aprenda as bases da costura, incluindo tipos de tecidos, pontos, e máquinas de costura.",
+      "desc": ""
+     }
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-01-7",
+   "tipo": "bonus",
+   "dados": {
+    "titulo": "e ainda +Bônus Exclusivos",
+    "sub": "",
+    "itens": [
+     {
+      "valor": "",
+      "nome": "Escreva o bônus aqui",
+      "desc": "Aqui você pode descrever o que tem dentro desse bônus que a pessoa recebe ao comprar."
+     },
+     {
+      "valor": "",
+      "nome": "Escreva o bônus aqui",
+      "desc": "Aqui você pode descrever o que tem dentro desse bônus que a pessoa recebe ao comprar."
+     },
+     {
+      "valor": "",
+      "nome": "Escreva o bônus aqui",
+      "desc": "Aqui você pode descrever o que tem dentro desse bônus que a pessoa recebe ao comprar."
+     }
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-01-8",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/04/4costureira-cursos-cpt.jpg",
+    "nome": "Isabela Mendes",
+    "bio": "Uma apaixonada costureira de 36 anos, é a criadora do nosso curso de Costura em Casa. Com mais de uma década de experiência no mundo da costura, ela começou como autodidata e se destacou ao transformar seu talento em uma carreira de sucesso.Sua jornada inclui aprimoramento constante, criação de uma ",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-01-9",
+   "tipo": "preco",
+   "dados": {
+    "de": "R$19,70",
+    "por": "R$197,00",
+    "label": "",
+    "inclui": [
+     "Item da lista #1",
+     "Item da lista #1",
+     "Item da lista #1",
+     "Item da lista #1"
+    ],
+    "parcelas": "em até 12x no cartão",
+    "pix": "",
+    "cta": "QUERO GARANTIR A MINHA VAGA!",
+    "garantia": ""
+   }
+  },
+  {
+   "id": "el-el-vendas-01-10",
+   "tipo": "depoimentos",
+   "dados": {
+    "titulo": "Essas alunas também ja estão tendo resultados:",
+    "estilo": "grade",
+    "deps": [
+     {
+      "foto": "",
+      "texto": "\"Graças ao curso, consegui realizar meu sonho de trabalhar de casa como costureira. Agora ganho dinheiro fazendo o que amo!\"",
+      "nome": "Mariana Luiza"
+     },
+     {
+      "foto": "",
+      "texto": "\"O curso foi um divisor de águas na minha vida. Hoje, ganho R$ 4.000 por mês costurando em casa. Recomendo a todos!\"",
+      "nome": "Eliane Silva"
+     },
+     {
+      "foto": "",
+      "texto": "\"Eu nunca imaginei que poderia ganhar tanto dinheiro costurando em casa. O curso foi incrível e mudou minha vida financeira.\"",
+      "nome": "Rosana Lima"
+     },
+     {
+      "foto": "",
+      "texto": "\"Estou maravilhada com os resultados! Com o curso, transformei meu hobby em uma fonte de renda sólida. Não poderia estar mais feliz!\"",
+      "nome": "Kelly Maria"
+     }
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-01-11",
+   "tipo": "garantia",
+   "dados": {
+    "titulo": "Sua satisfação é garantida !",
+    "texto": "Você adquire agora o acesso completo ao [ÑOME DO CURSO] pela condição especial de R$ 97,00 e tem 7 dias para avaliar. Se por algum motivo você achar que este material não é pra você, ou que não vale o investimento, basta me enviar uma mensagem que devolvo integralmente seu dinheiro. Agora a decisão ",
+    "dias": "7"
+   }
+  },
+  {
+   "id": "el-el-vendas-01-12",
+   "tipo": "cta",
+   "dados": {
+    "texto": "QUERO EXPERIMENTAR AGORA"
+   }
+  },
+  {
+   "id": "el-el-vendas-01-13",
+   "tipo": "faq",
+   "dados": {
+    "titulo": "Perguntas frequentes",
+    "faqs": [
+     {
+      "p": "Como funciona?",
+      "r": "Edite as perguntas no editor visual."
+     }
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-01-14",
+   "tipo": "cta",
+   "dados": {
+    "texto": "QUERO FALAR COM UM ESPECIALISTA"
+   }
+  }
+ ]
+}

@@ -75,6 +75,9 @@ export async function POST(request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY,
   );
   const agora = new Date().toISOString();
+  let enviados = 0,
+    pulados = 0,
+    erros = [];
   // Etapa 2 desconto PRIMEIRO (cria D1 devidos p/ o loop abaixo pegar).
   // Regra: agente + sem resultado + motivo abandono/pendente + etapa 1
   // concluída (sem T/P/R pendente; último enviado há >= dias) + sem D1
@@ -140,15 +143,12 @@ export async function POST(request) {
   }
   const { data: devidos } = await supabase
     .from("wpp_followups")
-    .select("id, etapa, conversa_id, tenant_id")
+    .select("id, etapa, conversa_id, tenant_id, criado_em")
     .lte("agendado_para", agora)
     .is("enviado_em", null)
     .eq("cancelado", false)
     .order("agendado_para")
     .limit(50);
-  let enviados = 0,
-    pulados = 0,
-    erros = [];
   for (const f of devidos || []) {
     // Claim atômico: marca enviando primeiro; se outro worker pegou, pula.
     // (2 crons sobrepostos mandavam 2x a mesma msg.)
@@ -179,13 +179,48 @@ export async function POST(request) {
           .single(),
       ]);
       // Só o agente envia; humano/opt-out/final não recebe toque.
+      // Terminal: cancela (claim já marcou enviado; sem isso vira "enviado" fantasma).
       if (!conv || conv.status !== "agente" || conv.resultado) {
+        await supabase.from("wpp_followups").update({ cancelado: true }).eq("id", f.id);
         pulados++;
         continue;
       }
+      // Sem credencial: devolve à fila (tenta de novo quando conectar).
       if (!cred?.instancia || !cred?.token) {
+        await supabase.from("wpp_followups").update({ enviado_em: null }).eq("id", f.id);
         pulados++;
         continue;
+      }
+      // Humano assumiu (painel ou app)? Auto para — o dono é ele.
+      let humano = false;
+      try {
+        const { data: th } = await supabase
+          .from("wpp_conversas")
+          .select("teve_humano")
+          .eq("id", conv.id)
+          .single();
+        humano = th?.teve_humano === true;
+      } catch {}
+      if (humano) {
+        await supabase.from("wpp_followups").update({ cancelado: true }).eq("id", f.id);
+        pulados++;
+        continue;
+      }
+      // Lead respondeu depois do agendamento? Toque perdeu o sentido (T/P/R).
+      // PROMESSA/D1/NE têm acordo próprio — mantêm.
+      if (["T1", "T2", "T3", "P1", "P2", "R1"].includes(f.etapa) && f.criado_em) {
+        const { data: rep } = await supabase
+          .from("wpp_mensagens")
+          .select("id")
+          .eq("conversa_id", conv.id)
+          .eq("direcao", "in")
+          .gt("criado_em", f.criado_em)
+          .limit(1);
+        if (rep?.length) {
+          await supabase.from("wpp_followups").update({ cancelado: true }).eq("id", f.id);
+          pulados++;
+          continue;
+        }
       }
       let prod = null;
       {
@@ -215,6 +250,7 @@ export async function POST(request) {
       if (f.etapa === "NE1" || f.etapa === "NE2") {
         const entrou = await jaEntrou(supabase, f.tenant_id, conv);
         if (entrou) {
+          await supabase.from("wpp_followups").update({ cancelado: true }).eq("id", f.id);
           pulados++;
           continue;
         }
@@ -222,6 +258,7 @@ export async function POST(request) {
           process.env.NEXT_PUBLIC_SITE_URL || "https://prismas.click";
         acessoUrl = `${base}/${tn?.slug || ""}/acesso`;
       } else if (!link?.url) {
+        await supabase.from("wpp_followups").update({ enviado_em: null }).eq("id", f.id);
         pulados++;
         continue;
       }
@@ -286,6 +323,7 @@ export async function POST(request) {
         textos = textoEtapa(f.etapa, base);
       }
       if (!textos?.length) {
+        await supabase.from("wpp_followups").update({ enviado_em: null }).eq("id", f.id);
         pulados++;
         continue;
       }

@@ -1,0 +1,70 @@
+{
+ "id": "el-upsell-07",
+ "nome": "Upsell com vídeo",
+ "uso": "Ideal para: oferta pós-compra com demonstração.",
+ "ordem": [
+  "hero",
+  "vsl",
+  "preco",
+  "produto",
+  "garantia"
+ ],
+ "blocos": [
+  {
+   "id": "el-el-upsell-07-1",
+   "tipo": "hero",
+   "dados": {
+    "eyebrow": "",
+    "h1": "VEJA ESTA OFERTA ESPECIAL QUE PREPAREI PARA VOCÊ!",
+    "sub": "Você só verá esta página uma única vez; portanto, leia todas as palavras ( e assista ao vídeo ) com muita atenção. É realmente muito importante...",
+    "cta": "SIM, ADICIONE AO MEU PEDIDO!",
+    "prova": ""
+   }
+  },
+  {
+   "id": "el-el-upsell-07-2",
+   "tipo": "vsl",
+   "dados": {
+    "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+   }
+  },
+  {
+   "id": "el-el-upsell-07-3",
+   "tipo": "preco",
+   "dados": {
+    "de": "R$ 1.000",
+    "por": "R$ 1.000",
+    "label": "",
+    "inclui": [],
+    "parcelas": "",
+    "pix": "",
+    "cta": "QUERO APROVEITAR ESTA OFERTA",
+    "garantia": ""
+   }
+  },
+  {
+   "id": "el-el-upsell-07-4",
+   "tipo": "produto",
+   "dados": {
+    "titulo": "VEJA TUDO O QUE VOCÊ LEVA AGORA",
+    "sub": "Não, obrigado, eu não quero adicionar ao meu pedido",
+    "checklist": [
+     "Item da oferta número 1 (R$ 97)",
+     "Item da oferta número 2 (R$ 497)",
+     "Item da oferta número 3 (R$ 1.997)",
+     "Item da oferta número 4 (R$ 4997)"
+    ],
+    "mockup_url": "https://jeffersonwalves.com.br/wp-content/uploads/2024/03/mockupao-scaled.webp"
+   }
+  },
+  {
+   "id": "el-el-upsell-07-5",
+   "tipo": "garantia",
+   "dados": {
+    "titulo": "Sua satisfação é garantida !",
+    "texto": "Você adquire agora o acesso completo ao [ÑOME DO CURSO] pela condição especial de R$ 97,00 e tem 7 dias para avaliar. Se por algum motivo você achar que este material não é pra você, ou que não vale o investimento, basta me enviar uma mensagem que devolvo integralmente seu dinheiro. Agora a decisão ",
+    "dias": "7"
+   }
+  }
+ ]
+}

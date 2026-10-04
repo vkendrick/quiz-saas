@@ -1,0 +1,74 @@
+{
+ "id": "el-captura-05",
+ "nome": "Captura com cronograma",
+ "uso": "Ideal para: captar para série de aulas com datas.",
+ "ordem": [
+  "captura",
+  "vsl",
+  "captura",
+  "countdown",
+  "autor",
+  "captura"
+ ],
+ "blocos": [
+  {
+   "id": "el-el-captura-05-1",
+   "tipo": "captura",
+   "dados": {
+    "titulo": "Uma semana de aulas gratuitas para você descobrir {PROMESSA DO EVENTO}",
+    "sub": "Evento online e gratuito dos dias xx a 12 de Setembro",
+    "nome": false,
+    "botao": "Garantir minha vaga",
+    "msg_ok": "Inscrição recebida! Confira seu e-mail."
+   }
+  },
+  {
+   "id": "el-el-captura-05-2",
+   "tipo": "vsl",
+   "dados": {
+    "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+   }
+  },
+  {
+   "id": "el-el-captura-05-3",
+   "tipo": "captura",
+   "dados": {
+    "titulo": "Não perca essa oportunidade",
+    "sub": "Aprenda os principais requisitos de admissibilidade utilizando as hipóteses constitucionais de cabimento. Dominando o conceito de lei federal e várias súmulas como 280, 281 e 284/STF e 5 e 7/STJ. Você",
+    "nome": false,
+    "botao": "Garantir minha vaga",
+    "msg_ok": "Inscrição recebida! Confira seu e-mail."
+   }
+  },
+  {
+   "id": "el-el-captura-05-4",
+   "tipo": "countdown",
+   "dados": {
+    "estilo": "barra",
+    "texto": "As inscrições encerram em",
+    "data_fim": ""
+   }
+  },
+  {
+   "id": "el-el-captura-05-5",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/ADV-2.png",
+    "nome": "Conheça o professor",
+    "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillu",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-captura-05-6",
+   "tipo": "captura",
+   "dados": {
+    "titulo": "Garanta a sua vaga",
+    "sub": "Domine os requisitos de admissibilidade necessários para ter o seu próximo REsp admitido pelo STJ",
+    "nome": false,
+    "botao": "Garantir minha vaga",
+    "msg_ok": "Inscrição recebida! Confira seu e-mail."
+   }
+  }
+ ]
+}

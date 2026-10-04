@@ -34,14 +34,27 @@ export async function POST(request) {
   const row = {
     tenant_id: t.id,
     slug: String(page.slug).toLowerCase().trim().replace(/[^a-z0-9-]/g, '-'),
-    template: ['vendas-classica', 'receitas-doces', 'curso-pratico', 'desafio-evento', 'catalogo-receitas', 'livro-oferta', 'quiz-diagnostico', 'em-branco'].includes(page.template) ? page.template : 'vendas-classica',
+    template: ['vendas-classica', 'receitas-doces', 'curso-pratico', 'desafio-evento', 'catalogo-receitas', 'livro-oferta', 'quiz-diagnostico', 'em-branco', 'el-vendas-01', 'el-vendas-02', 'el-vendas-03', 'el-captura-04', 'el-captura-05', 'el-upsell-06', 'el-upsell-07', 'el-vsl-08', 'el-obrigado'].includes(page.template) ? page.template : 'vendas-classica',
     theme: page.theme || 'unha',
     title: page.title || null,
     config: page.config || {},
     published: page.published === true,
   };
-  const { data, error } = await supabase.from('pages').upsert(row,
-    { onConflict: 'tenant_id,slug' }).select().single();
+  // Edição por id (renomear não duplica); criação barra slug em uso (409).
+  if (page.id) {
+    const { data: cur } = await supabase.from('pages').select('slug').eq('id', page.id).eq('tenant_id', t.id).single();
+    if (!cur) return Response.json({ error: 'Página inexistente' }, { status: 404 });
+    if (cur.slug !== row.slug) {
+      const { data: ja } = await supabase.from('pages').select('id').eq('tenant_id', t.id).eq('slug', row.slug).limit(1).single();
+      if (ja) return Response.json({ error: 'Endereço em uso por outra página.' }, { status: 409 });
+    }
+    const { data, error } = await supabase.from('pages').update(row).eq('id', page.id).eq('tenant_id', t.id).select().single();
+    if (error) return Response.json({ error: error.message }, { status: 400 });
+    return Response.json({ ok: true, page: data, url: `/${tenant}/p/${data.slug}` });
+  }
+  const { data: ja } = await supabase.from('pages').select('id').eq('tenant_id', t.id).eq('slug', row.slug).limit(1).single();
+  if (ja) return Response.json({ error: 'Endereço em uso — escolha outro slug.' }, { status: 409 });
+  const { data, error } = await supabase.from('pages').insert(row).select().single();
   if (error) return Response.json({ error: error.message }, { status: 400 });
   return Response.json({ ok: true, page: data,
     url: `/${tenant}/p/${data.slug}` });

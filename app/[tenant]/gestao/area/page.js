@@ -21,7 +21,9 @@ h1{font-size:24px;margin-bottom:4px}
 .card h3{font-size:16px;margin-bottom:8px}
 .mut{color:#9AA4B5;font-size:13px;line-height:1.6}
 label{font-size:12px;color:#9AA4B5;display:block;margin:10px 0 4px}
-input[type=text],input:not([type]),select,textarea{width:100%;background:#0E1420;border:1px solid #232B3B;border-radius:10px;padding:10px;color:#E8ECF3;font-size:14px}
+input[type=text],input:not([type]),input[type=date],input[type=email],input[type=number],select,textarea{width:100%;background:#0E1420;border:1px solid #232B3B;border-radius:10px;padding:10px;color:#E8ECF3;font-size:14px}
+input[type=date]{width:auto;color-scheme:dark}
+input[type=date]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:.7}
 input[type=color]{width:56px;height:38px;background:#0E1420;border:1px solid #232B3B;border-radius:10px;padding:4px;cursor:pointer}
 input[type=date]{width:auto}
 .btn{background:#2EAA84;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer}
@@ -668,11 +670,15 @@ function MembrosOferta({ tenant, oferta }) {
   const [ate, setAte] = useState("");
   const [plat, setPlat] = useState("");
   const [erroM, setErroM] = useState(null);
+  const [totalM, setTotalM] = useState(0);
+  const [maisM, setMaisM] = useState(false);
 
   useEffect(() => {
     setRows(null);
+    setErroM(null);
+    setMaisM(false);
     Promise.all([
-      fetch(`/api/prisma/admin/members?tenant=${tenant}&product=${oferta.slug}`)
+      fetch(`/api/prisma/admin/members?tenant=${tenant}&product=${oferta.slug}&limit=50`)
         .then((r) => r.json())
         .catch(() => ({})),
       fetch(
@@ -681,10 +687,30 @@ function MembrosOferta({ tenant, oferta }) {
         .then((r) => r.json())
         .catch(() => ({})),
     ]).then(([m, v]) => {
+      if (!m.ok) setErroM(m.error || "Falha ao carregar membros");
+      if (!v.ok && !v.vendas) setErroM((e) => e || v.error || "Falha ao carregar vendas");
       setRows(m.ok ? m.members || [] : []);
-      setVendas(v.ok ? v.vendas || [] : []);
+      setTotalM(m.ok ? m.total ?? (m.members || []).length : 0);
+      setVendas(v.ok || v.vendas ? v.vendas || [] : []);
     });
   }, [tenant, oferta.slug]);
+
+  const carregarMais = async () => {
+    setMaisM(true);
+    setErroM(null);
+    const r = await fetch(
+      `/api/prisma/admin/members?tenant=${tenant}&product=${oferta.slug}&limit=50&offset=${rows.length}`,
+    )
+      .then((r) => r.json())
+      .catch(() => ({}));
+    setMaisM(false);
+    if (!r.ok) {
+      setErroM(r.error || "Falha");
+      return;
+    }
+    setRows((rs) => [...(rs || []), ...(r.members || [])]);
+    if (r.total != null) setTotalM(r.total);
+  };
 
   const noPeriodo = (iso) => {
     if (!iso) return true;
@@ -747,8 +773,15 @@ function MembrosOferta({ tenant, oferta }) {
         <div>
           <label>&nbsp;</label>
           <span className="mut">
-            <b style={{ color: "#fff" }}>{lista.length}</b> alunos · {comCompra}{" "}
-            com compra no período
+            {rows === null ? (
+              "Carregando membros…"
+            ) : (
+              <>
+                <b style={{ color: "#fff" }}>{lista.length}</b> alunos
+                {totalM > lista.length ? ` (últimos ${lista.length} de ${totalM})` : ""} ·{" "}
+                {comCompra} com compra no período
+              </>
+            )}
           </span>
         </div>
       </div>
@@ -823,8 +856,15 @@ function MembrosOferta({ tenant, oferta }) {
           </tbody>
         </table>
       </div>
-      {rows !== null && !lista.length && (
+      {rows !== null && !lista.length && !erroM && (
         <p className="mut">Nenhum aluno neste filtro.</p>
+      )}
+      {rows !== null && totalM > rows.length && (
+        <div className="row" style={{ marginTop: 10 }}>
+          <button className="btn ghost sm" disabled={maisM} onClick={carregarMais}>
+            {maisM ? "Carregando…" : `Mostrar mais (faltam ${totalM - rows.length})`}
+          </button>
+        </div>
       )}
     </div>
   );

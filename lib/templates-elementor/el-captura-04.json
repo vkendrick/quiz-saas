@@ -1,0 +1,73 @@
+{
+ "id": "el-captura-04",
+ "nome": "Captura com evento",
+ "uso": "Ideal para: captar inscritos para evento ou workshop.",
+ "ordem": [
+  "captura",
+  "depoimentos",
+  "autor",
+  "captura"
+ ],
+ "blocos": [
+  {
+   "id": "el-el-captura-04-1",
+   "tipo": "captura",
+   "dados": {
+    "titulo": "Transforme Sua Prática Jurídica: aprenda a Capturar Clientes e Alcançar Vitórias no Direito Trabalhista",
+    "sub": "Descubra o Método Infalível que Capacita Advogados a Construir uma Carteira de Clientes Sólida e Alcançar Sucesso Consistente em Causas Trabalhistas.",
+    "nome": true,
+    "botao": "QUERO PARTICIPAR DESTE EVENTO!",
+    "msg_ok": "Inscrição recebida! Confira seu e-mail."
+   }
+  },
+  {
+   "id": "el-el-captura-04-2",
+   "tipo": "depoimentos",
+   "dados": {
+    "titulo": "Resultado de quem já teve contato com a Estratégia Vitoriosa do Trabalhista.",
+    "estilo": "grade",
+    "deps": [
+     {
+      "foto": "",
+      "texto": "Depoimento em vídeo — substitua pelo seu.",
+      "nome": "",
+      "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+     },
+     {
+      "foto": "",
+      "texto": "Depoimento em vídeo — substitua pelo seu.",
+      "nome": "",
+      "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+     },
+     {
+      "foto": "",
+      "texto": "Depoimento em vídeo — substitua pelo seu.",
+      "nome": "",
+      "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+     }
+    ]
+   }
+  },
+  {
+   "id": "el-el-captura-04-3",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/ADV-01.png",
+    "nome": "Dr. Marcelo Almeida",
+    "bio": "Dr. Marcelo Almeida é um renomado advogado especializado em direito trabalhista, com uma paixão singular por ajudar outros profissionais a atingirem seu máximo potencial. Com uma carreira jurídica consolidada e uma lista impressionante de vitórias em casos complexos, ele decidiu compartilhar suas es",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-captura-04-4",
+   "tipo": "captura",
+   "dados": {
+    "titulo": "Quer entender como capturar clientes e alcançar vitórias no Direito Trabalhista gratuitamente ?",
+    "sub": "AVISO: O espaço é limitado e esses Workshops sempre são preenchidos rapidamente porque são significativamente melhores do que as informações pelas quais as pessoas cobram caro para revelar...",
+    "nome": true,
+    "botao": "QUERO ASSISTIR GRÁTIS",
+    "msg_ok": "Inscrição recebida! Confira seu e-mail."
+   }
+  }
+ ]
+}

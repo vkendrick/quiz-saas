@@ -1,0 +1,51 @@
+{
+ "id": "el-upsell-06",
+ "nome": "Upsell com countdown",
+ "uso": "Ideal para: oferta única pós-compra com urgência.",
+ "ordem": [
+  "countdown",
+  "countdown",
+  "preco"
+ ],
+ "blocos": [
+  {
+   "id": "el-el-upsell-06-1",
+   "tipo": "countdown",
+   "dados": {
+    "estilo": "barra",
+    "texto": "Oferta por tempo limitado",
+    "data_fim": ""
+   }
+  },
+  {
+   "id": "el-el-upsell-06-2",
+   "tipo": "countdown",
+   "dados": {
+    "estilo": "barra",
+    "texto": "Oferta por tempo limitado",
+    "data_fim": ""
+   }
+  },
+  {
+   "id": "el-el-upsell-06-3",
+   "tipo": "preco",
+   "dados": {
+    "de": "",
+    "por": "R$ 27,00",
+    "label": "",
+    "inclui": [
+     "PARABÉNS, VOCÊ GANHOU UM SUPER DESCONTO!",
+     "Um UP No Seu Magnetismo Pessoal",
+     "Um UP Na Sua Autoridade",
+     "Se tornar um líder que as pessoas querem seguir",
+     "Como pensar em frente a câmera para falar muito mais solto",
+     "Como contar histórias que conectam sua audiência"
+    ],
+    "parcelas": "",
+    "pix": "",
+    "cta": "QUERO APROVEITAR ESTA OFERTA",
+    "garantia": ""
+   }
+  }
+ ]
+}

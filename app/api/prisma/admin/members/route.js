@@ -47,49 +47,52 @@ export async function GET(request) {
     .eq("tenant_id", t.id)
     .not("email", "ilike", "%@prisma.test")
     .not("email", "ilike", "%@teste.local")
-    .order("criado_em", { ascending: false })
-    .limit(200);
+    .order("criado_em", { ascending: false });
   const qq = (url.searchParams.get("q") || "").trim().replace(/[,()]/g, "");
   if (qq) {
     const like = `%${qq}%`;
     q = q.or(`email.ilike.${like},name.ilike.${like},phone.ilike.${like}`);
   }
   if (memberIds) q = q.in("id", memberIds);
-  const { data: members } = await q;
+  // Paginação: últimos 50 por padrão (rápido); ?limit=&offset= p/ mais.
+  const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "50", 10) || 50, 1), 200);
+  const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10) || 0, 0);
+  const { data: members, count } = await q.range(offset, offset + limit - 1).select("*", { count: "exact" });
 
-  const out = [];
-  for (const m of members || []) {
-    const [{ data: ents }, { data: sales }, { data: sess }] = await Promise.all(
-      [
-        supabase
-          .from("entitlements")
-          .select("status, products(slug)")
-          .eq("member_id", m.id),
-        supabase
-          .from("sales")
-          .select("valor, moeda, status")
-          .eq("member_email", m.email)
-          .eq("tenant_id", t.id),
-        supabase
-          .from("member_sessions")
-          .select("criado_em")
-          .eq("member_id", m.id)
-          .order("criado_em", { ascending: false })
-          .limit(1),
-      ],
-    );
-    out.push({
+  // Lote único (antes: 3 queries por membro).
+  const ids = (members || []).map((m) => m.id);
+  const emails = [...new Set((members || []).map((m) => String(m.email || "").toLowerCase()).filter(Boolean))];
+  const [{ data: allEnts }, { data: allSales }, { data: allSess }] = await Promise.all([
+    ids.length
+      ? supabase.from("entitlements").select("member_id, status, products(slug)").in("member_id", ids)
+      : Promise.resolve({ data: [] }),
+    emails.length
+      ? supabase.from("sales").select("valor, moeda, status, member_email").in("member_email", emails).eq("tenant_id", t.id)
+      : Promise.resolve({ data: [] }),
+    ids.length
+      ? supabase.from("member_sessions").select("member_id, criado_em").in("member_id", ids).order("criado_em", { ascending: false }).limit(ids.length * 3)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const sessBy = {};
+  for (const s of allSess || []) {
+    if (!sessBy[s.member_id]) sessBy[s.member_id] = s.criado_em;
+  }
+  const out = (members || []).map((m) => {
+    const k = String(m.email || "").toLowerCase();
+    const sales = (allSales || []).filter((s) => String(s.member_email || "").toLowerCase() === k);
+    const myEnts = (allEnts || []).filter((e) => e.member_id === m.id);
+    return {
       ...m,
       email_mask: m.email.replace(/^(.).*(@.*)$/, "$1***$2"),
-      ultimo_acesso: sess?.[0]?.criado_em || null,
-      entitlements: (ents || []).map((e) => e.products?.slug + ":" + e.status),
-      compras: (sales || []).length,
-      total: (sales || [])
+      ultimo_acesso: sessBy[m.id] || null,
+      entitlements: myEnts.map((e) => e.products?.slug + ":" + e.status),
+      compras: sales.length,
+      total: sales
         .filter((s) => s.status === "approved")
         .reduce((a, s) => a + (+s.valor || 0), 0),
-    });
-  }
-  return Response.json({ ok: true, members: out });
+    };
+  });
+  return Response.json({ ok: true, members: out, total: count ?? out.length, limit, offset });
 }
 
 export async function POST(request) {

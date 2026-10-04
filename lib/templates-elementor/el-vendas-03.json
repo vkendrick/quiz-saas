@@ -1,0 +1,227 @@
+{
+ "id": "el-vendas-03",
+ "nome": "Vendas escura com carrossel",
+ "uso": "Ideal para: vendas com depoimentos em carrossel e FAQ sanfona.",
+ "ordem": [
+  "produto",
+  "vsl",
+  "carrossel",
+  "dor",
+  "produto",
+  "faq",
+  "autor",
+  "autor",
+  "autor",
+  "autor",
+  "preco",
+  "autor",
+  "depoimentos",
+  "garantia",
+  "cta"
+ ],
+ "blocos": [
+  {
+   "id": "el-el-vendas-03-1",
+   "tipo": "produto",
+   "dados": {
+    "titulo": "Aprenda a fazer vídeos criativos que chamam atenção e atraem clientes para o seu instagram",
+    "sub": "Aprenda como criar vídeos virais do zero e com apps gratuitos no seu celular, construa um perfil viral que atrai clientes reais.",
+    "checklist": [
+     "Acesso imediato"
+    ],
+    "mockup_url": "https://jeffersonwalves.com.br/wp-content/uploads/2024/03/Mob-Capcut-02.webp"
+   }
+  },
+  {
+   "id": "el-el-vendas-03-2",
+   "tipo": "vsl",
+   "dados": {
+    "video_url": "https://www.youtube.com/embed/LiR52lqjwEo&pp=ygULQ2FwY3V0IGVkaXQ%3D"
+   }
+  },
+  {
+   "id": "el-el-vendas-03-3",
+   "tipo": "carrossel",
+   "dados": {
+    "titulo": "Veja o resultado de quem é aluna...",
+    "sub": "",
+    "slides": [
+     {
+      "src": "https://jeffersonwalves.com.br/wp-content/uploads/2024/03/Frame-6.png",
+      "legenda": ""
+     },
+     {
+      "src": "https://jeffersonwalves.com.br/wp-content/uploads/2024/03/Frame-7.png",
+      "legenda": ""
+     },
+     {
+      "src": "https://jeffersonwalves.com.br/wp-content/uploads/2024/03/Frame-4.png",
+      "legenda": ""
+     },
+     {
+      "src": "https://jeffersonwalves.com.br/wp-content/uploads/2024/03/Frame-5.png",
+      "legenda": ""
+     }
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-03-4",
+   "tipo": "dor",
+   "dados": {
+    "titulo": "É possível faturar muito mais usando o instagram para atrair clientes com vídeos virais.",
+    "itens": [
+     "Quebra de Objeção 1",
+     "Quebra de Objeção 2",
+     "Quebra de Objeção 3",
+     "Quebra de Objeção 4"
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-03-5",
+   "tipo": "produto",
+   "dados": {
+    "titulo": "A solução para criar vídeos que atraem clientes para o seu instagram, usando apenas o celular e Apps Gratuitos",
+    "sub": "",
+    "checklist": [
+     "Aprenda as bases da Manutenção de Smartphone, incluindo tipos de reparos, ferramentas e fornecedores.",
+     "Descubra como atender clientes sem precisar de uma grande estrutura",
+     "Explore técnicas para divulgar o seu trabalho",
+     "Descubra como otimizar seu tempo para aumentar a produtividade e atingir suas metas financeiras.",
+     "Saiba como gerenciar as finanças do seu negócio de costura, incluindo precificação, orçamentos e economia."
+    ],
+    "mockup_url": "https://jeffersonwalves.com.br/wp-content/uploads/2024/03/Mob-Capcut.webp"
+   }
+  },
+  {
+   "id": "el-el-vendas-03-6",
+   "tipo": "faq",
+   "dados": {
+    "titulo": "Perguntas frequentes",
+    "faqs": [
+     {
+      "p": "Como funciona?",
+      "r": "Edite as perguntas no editor visual."
+     }
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-03-7",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/453.png",
+    "nome": "E-book Gestão do Tempo",
+    "bio": "Descubra como otimizar seu tempo para aumentar a produtividade e atingir suas metas financeiras.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-03-8",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/453.png",
+    "nome": "Planner Financeiro:",
+    "bio": "Saiba como gerenciar as finanças do seu negócio de costura, incluindo precificação, orçamentos e economia.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-03-9",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/453.png",
+    "nome": "Funil de conteúdo",
+    "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-03-10",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/01/453.png",
+    "nome": "Meta Ads básico",
+    "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-03-11",
+   "tipo": "preco",
+   "dados": {
+    "de": "R$19,70",
+    "por": "R$197,00",
+    "label": "",
+    "inclui": [
+     "Nome do Curso",
+     "Bônus 1",
+     "Bônus 2",
+     "Bônus 3",
+     "Bônus 4"
+    ],
+    "parcelas": "em até 12x no cartão",
+    "pix": "",
+    "cta": "QUERO GARANTIR A MINHA VAGA!",
+    "garantia": ""
+   }
+  },
+  {
+   "id": "el-el-vendas-03-12",
+   "tipo": "autor",
+   "dados": {
+    "foto": "https://jeffersonwalves.com.br/wp-content/uploads/2024/03/Emilia-Mockup.webp",
+    "nome": "Julia Lopes",
+    "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.Lorem ipsum dolor sit amet, consectetur adipiscing",
+    "numeros": []
+   }
+  },
+  {
+   "id": "el-el-vendas-03-13",
+   "tipo": "depoimentos",
+   "dados": {
+    "titulo": "Essas alunas também ja estão tendo resultados:",
+    "estilo": "grade",
+    "deps": [
+     {
+      "foto": "",
+      "texto": "",
+      "nome": "Leonardo Santos"
+     },
+     {
+      "foto": "",
+      "texto": "",
+      "nome": "Pedro Alves"
+     },
+     {
+      "foto": "",
+      "texto": "",
+      "nome": "Luiz Silva"
+     },
+     {
+      "foto": "",
+      "texto": "",
+      "nome": "Cleiton Lucio"
+     }
+    ]
+   }
+  },
+  {
+   "id": "el-el-vendas-03-14",
+   "tipo": "garantia",
+   "dados": {
+    "titulo": "Sua satisfação é garantida !",
+    "texto": "Você adquire agora o acesso completo ao [ÑOME DO CURSO] pela condição especial de R$ 97,00 e tem 7 dias para avaliar. Se por algum motivo você achar que este material não é pra você, ou que não vale o investimento, basta me enviar uma mensagem que devolvo integralmente seu dinheiro. Agora a decisão ",
+    "dias": "7"
+   }
+  },
+  {
+   "id": "el-el-vendas-03-15",
+   "tipo": "cta",
+   "dados": {
+    "texto": "QUERO EXPERIMENTAR AGORA"
+   }
+  }
+ ]
+}

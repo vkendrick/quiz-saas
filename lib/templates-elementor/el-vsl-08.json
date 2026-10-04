@@ -1,0 +1,82 @@
+{
+ "id": "el-vsl-08",
+ "nome": "VSL curta",
+ "uso": "Ideal para: páginas focadas em um único vídeo.",
+ "ordem": [
+  "hero",
+  "vsl",
+  "depoimentos",
+  "garantia",
+  "cta"
+ ],
+ "blocos": [
+  {
+   "id": "el-el-vsl-08-1",
+   "tipo": "hero",
+   "dados": {
+    "eyebrow": "",
+    "h1": "A METÓDO COMPROVADO PARA ALCANÇAR [PROMESSA DO PRODUTO]",
+    "sub": "OBSERVAÇÃO: Essa aula nada convencional tem o poder de virar a chave do seu negócio em apenas 1 semana.",
+    "cta": "QUERO GARANTIR A MINHA VAGA",
+    "prova": ""
+   }
+  },
+  {
+   "id": "el-el-vsl-08-2",
+   "tipo": "vsl",
+   "dados": {
+    "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+   }
+  },
+  {
+   "id": "el-el-vsl-08-3",
+   "tipo": "depoimentos",
+   "dados": {
+    "titulo": "Veja o resultado",
+    "estilo": "grade",
+    "deps": [
+     {
+      "foto": "",
+      "texto": "Depoimento em vídeo — substitua pelo seu.",
+      "nome": "",
+      "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+     },
+     {
+      "foto": "",
+      "texto": "Depoimento em vídeo — substitua pelo seu.",
+      "nome": "",
+      "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+     },
+     {
+      "foto": "",
+      "texto": "Depoimento em vídeo — substitua pelo seu.",
+      "nome": "",
+      "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+     },
+     {
+      "foto": "",
+      "texto": "Depoimento em vídeo — substitua pelo seu.",
+      "nome": "",
+      "video_url": "https://www.youtube.com/embed/XHOmBV4js_E"
+     }
+    ]
+   }
+  },
+  {
+   "id": "el-el-vsl-08-4",
+   "tipo": "garantia",
+   "dados": {
+    "titulo": "Sua satisfação é garantida !",
+    "texto": "Você adquire agora o acesso completo ao [ÑOME DO CURSO] pela condição especial de R$ 97,00 e tem 7 dias para avaliar. Se por algum motivo você achar que este material não é pra você, ou que não vale o investimento, basta me enviar uma mensagem que devolvo integralmente seu dinheiro. Agora a decisão ",
+    "dias": "7"
+   }
+  },
+  {
+   "id": "el-el-vsl-08-5",
+   "tipo": "cta",
+   "dados": {
+    "texto": "QUERO GARANTIR A MINHA VAGA"
+   }
+  }
+ ]
+}
